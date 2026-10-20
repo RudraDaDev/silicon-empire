@@ -111,8 +111,9 @@ html[data-motion="off"] *::after {
   display: none;
 }
 
-body[data-screen="login"] .screen--login,
-body[data-screen="menu"] .screen--menu {
+body[data-screen="newgame"] .screen--login,
+body[data-screen="menu"] .screen--menu,
+body[data-screen="desk"] .screen--desk {
   display: grid;
 }
 

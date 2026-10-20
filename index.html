@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-motion="on">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,25 +8,29 @@
 <link rel="stylesheet" href="./src/styles/base.css">
 <link rel="stylesheet" href="./src/styles/components.css">
 <link rel="stylesheet" href="./src/styles/screens.css">
+<link rel="stylesheet" href="./src/styles/desk.css">
 </head>
-<body data-screen="login" data-scale="md">
+<body data-screen="menu" data-scale="md">
 
-<!-- ═══════════════ hand-drawn icon sprite ═══════════════
-     24×24 grid, artwork inset to 20×20, one stroke weight.
-     No emoji anywhere in this project. -->
+<!-- ══════════════ hand-drawn icon sprite — 24×24 grid, one stroke weight ══════════════ -->
 <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
   <symbol id="i-die" viewBox="0 0 24 24">
     <rect x="5" y="5" width="14" height="14" rx="1.5"/>
     <rect x="9.5" y="9.5" width="5" height="5" rx="1"/>
     <path d="M9 2.5v2.5M15 2.5v2.5M9 19v2.5M15 19v2.5M2.5 9H5M2.5 15H5M19 9h2.5M19 15h2.5"/>
   </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24">
+    <path d="M4.2 10.6 12 4.2l7.8 6.4"/>
+    <path d="M6.2 9.8v9.4c0 .6.5 1 1 1h9.6c.6 0 1-.4 1-1V9.8"/>
+    <path d="M9.8 20.2v-5.4h4.4v5.4"/>
+  </symbol>
   <symbol id="i-user" viewBox="0 0 24 24">
     <circle cx="12" cy="8.5" r="3.6"/>
     <path d="M4.7 20.2c.9-3.7 3.8-5.6 7.3-5.6s6.4 1.9 7.3 5.6"/>
   </symbol>
-  <symbol id="i-plus" viewBox="0 0 24 24">
-    <path d="M12 5.2v13.4M5.3 12.1h13.4"/>
-  </symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.2v13.4M5.3 12.1h13.4"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8.4 5.6 18.6 12 8.4 18.4z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9.4 5.6v12.8M14.6 5.6v12.8"/></symbol>
   <symbol id="i-disk" viewBox="0 0 24 24">
     <path d="M4.6 6.2c0-1 .8-1.7 1.7-1.7h11.4c1 0 1.7.8 1.7 1.7v13.3H4.6z"/>
     <path d="M8.3 4.7v5h7.2v-5M8.6 19.4v-5.1h6.9v5.1"/>
@@ -36,23 +40,15 @@
     <path d="M12 3.2v2.2M12 18.6v2.2M3.2 12h2.2M18.6 12h2.2M5.8 5.8l1.6 1.6M16.6 16.6l1.6 1.6M18.2 5.8l-1.6 1.6M7.4 16.6l-1.6 1.6"/>
   </symbol>
   <symbol id="i-info" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="8.4"/>
-    <path d="M12 10.7v5.6M12 7.7v.6"/>
+    <circle cx="12" cy="12" r="8.4"/><path d="M12 10.7v5.6M12 7.7v.6"/>
   </symbol>
   <symbol id="i-exit" viewBox="0 0 24 24">
     <path d="M14.4 4.6H6.2c-1 0-1.7.8-1.7 1.7v11.4c0 1 .8 1.7 1.7 1.7h8.2"/>
     <path d="M17.6 8.6 21 12l-3.4 3.4M11 12h9.6"/>
   </symbol>
-  <symbol id="i-arrow" viewBox="0 0 24 24">
-    <path d="M4.6 12h14M13.4 6.8 18.6 12l-5.2 5.2"/>
-  </symbol>
-  <symbol id="i-check" viewBox="0 0 24 24">
-    <path d="M5.2 12.6 9.8 17l9-10"/>
-  </symbol>
-  <symbol id="i-warn" viewBox="0 0 24 24">
-    <path d="M12 4.4 21 19.6H3z"/>
-    <path d="M12 10v3.6M12 16.7v.5"/>
-  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4.6 12h14M13.4 6.8 18.6 12l-5.2 5.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5.2 12.6 9.8 17l9-10"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4.4 21 19.6H3z"/><path d="M12 10v3.6M12 16.7v.5"/></symbol>
   <symbol id="i-calendar" viewBox="0 0 24 24">
     <rect x="4.3" y="5.7" width="15.4" height="14" rx="2"/>
     <path d="M4.3 10h15.4M8.6 3.8v3.6M15.4 3.8v3.6"/>
@@ -65,82 +61,106 @@
     <path d="M4.6 5.4c2.4-.9 4.9-.9 7.4.6 2.5-1.5 5-1.5 7.4-.6v13c-2.4-.9-4.9-.9-7.4.6-2.5-1.5-5-1.5-7.4-.6z"/>
     <path d="M12 6v13"/>
   </symbol>
+  <symbol id="i-ruler" viewBox="0 0 24 24">
+    <rect x="2.8" y="8.2" width="18.4" height="7.6" rx="1.4"/>
+    <path d="M6.6 8.4v3.2M10 8.4v2.2M13.4 8.4v3.2M16.8 8.4v2.2"/>
+  </symbol>
+  <symbol id="i-beaker" viewBox="0 0 24 24">
+    <path d="M9.2 3.6v5.2L4.8 17c-.5.9.1 1.9 1.1 1.9h12.2c1 0 1.6-1 1.1-1.9l-4.4-8.2V3.6"/>
+    <path d="M7.8 3.6h8.4M6.6 14.2h10.8"/>
+  </symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24">
+    <path d="M12 4.4v15.2M7.4 19.6h9.2M4.4 8.2h15.2"/>
+    <path d="M4.4 8.2 1.9 14a2.6 2.6 0 0 0 5 0zM19.6 8.2 17.1 14a2.6 2.6 0 0 0 5 0z"/>
+  </symbol>
+  <symbol id="i-ledger" viewBox="0 0 24 24">
+    <rect x="4.6" y="3.6" width="14.8" height="16.8" rx="1.6"/>
+    <path d="M8.2 8.2h7.6M8.2 12h7.6M8.2 15.8h4.6"/>
+    <path d="M2.8 6.4h1.8M2.8 12h1.8M2.8 17.6h1.8"/>
+  </symbol>
+  <symbol id="i-news" viewBox="0 0 24 24">
+    <rect x="3.4" y="5.2" width="14" height="13.6" rx="1.4"/>
+    <path d="M17.4 8.6h2.2c.6 0 1 .5 1 1v7.8c0 .8-.6 1.4-1.4 1.4h-1.8"/>
+    <path d="M6.2 8.4h8.4v4H6.2zM6.2 15h8.4M6.2 17.2h5.2"/>
+  </symbol>
+  <symbol id="i-company" viewBox="0 0 24 24">
+    <path d="M3.6 20.4V7.2l7-3.6v16.8M10.6 20.4h9.8V11l-5.4-2.6"/>
+    <path d="M6.4 9.6h1.6M6.4 12.8h1.6M6.4 16h1.6M13.4 13.4h1.6M13.4 16.6h1.6"/>
+  </symbol>
+  <symbol id="i-data" viewBox="0 0 24 24">
+    <ellipse cx="12" cy="6.2" rx="7.4" ry="2.9"/>
+    <path d="M4.6 6.2v11.6c0 1.6 3.3 2.9 7.4 2.9s7.4-1.3 7.4-2.9V6.2"/>
+    <path d="M4.6 12c0 1.6 3.3 2.9 7.4 2.9s7.4-1.3 7.4-2.9"/>
+  </symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24">
+    <rect x="2.8" y="6.4" width="18.4" height="11.2" rx="1.8"/>
+    <circle cx="12" cy="12" r="2.8"/>
+    <path d="M6 9.6v4.8M18 9.6v4.8"/>
+  </symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24">
+    <path d="M12 4.2l1.9 4.7 4.7 1.9-4.7 1.9L12 17.4l-1.9-4.7L5.4 10.8l4.7-1.9z"/>
+    <path d="M18.6 16.4l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>
+  </symbol>
+  <symbol id="i-battery" viewBox="0 0 24 24">
+    <rect x="8.4" y="2.8" width="7.2" height="2.4" rx="1"/>
+    <rect x="5.6" y="5.6" width="12.8" height="15.6" rx="2"/>
+    <path d="M8.6 18.2v-8h6.8v8z" fill="currentColor" opacity=".55" stroke="none"/>
+  </symbol>
+
+  <!-- diorama artwork: a package + die with functional blocks -->
+  <symbol id="art-die" viewBox="0 0 320 320">
+    <rect class="dio-package" x="30" y="30" width="260" height="260" rx="14"/>
+    <rect class="dio-die" x="74" y="74" width="172" height="172" rx="4"/>
+    <g class="dio-block">
+      <rect x="84" y="84" width="72" height="62" rx="2"/>
+      <rect x="164" y="84" width="72" height="28" rx="2"/>
+      <rect x="164" y="118" width="72" height="28" rx="2"/>
+      <rect x="84" y="154" width="70" height="42" rx="2"/>
+      <rect x="162" y="154" width="74" height="42" rx="2"/>
+      <path d="M84 204h152"/>
+      <path d="M84 212h108"/>
+      <path d="M84 220h132"/>
+    </g>
+    <g class="dio-pin">
+      <path d="M52 30v-8M76 30v-8M100 30v-8M124 30v-8M148 30v-8M172 30v-8M196 30v-8M220 30v-8M244 30v-8M268 30v-8"/>
+      <path d="M52 290v8M76 290v8M100 290v8M124 290v8M148 290v8M172 290v8M196 290v8M220 290v8M244 290v8M268 290v8"/>
+      <path d="M30 52h-8M30 76h-8M30 100h-8M30 124h-8M30 148h-8M30 172h-8M30 196h-8M30 220h-8M30 244h-8M30 268h-8"/>
+      <path d="M290 52h8M290 76h8M290 100h8M290 124h8M290 148h8M290 172h8M290 196h8M290 220h8M290 244h8M290 268h8"/>
+    </g>
+    <g class="dio-label">
+      <text x="88" y="118">L2 CACHE</text>
+      <text x="168" y="102">FPU</text>
+      <text x="168" y="136">DECODE</text>
+      <text x="88" y="178">ALU ×2</text>
+      <text x="166" y="178">LOAD / STORE</text>
+    </g>
+    <text class="dio-note" x="30" y="16">FIG. 1 — DIE FLOORPLAN</text>
+    <text class="dio-note" x="196" y="312">SCALE 1:1</text>
+    <text class="dio-note" x="30" y="312">SHEET 01 / 04</text>
+  </symbol>
 </svg>
 
-<!-- ═══════════════════════════════ LOGIN ═══════════════════════════════ -->
-<main class="screen screen--login" id="screen-login" aria-labelledby="loginTitle">
-  <div class="blueprint-bg" aria-hidden="true"></div>
-  <span class="corner corner--tl" aria-hidden="true"></span>
-  <span class="corner corner--tr" aria-hidden="true"></span>
-  <span class="corner corner--bl" aria-hidden="true"></span>
-  <span class="corner corner--br" aria-hidden="true"></span>
-
-  <div class="login-wrap">
-    <header class="login-head">
-      <span class="login-mark" aria-hidden="true">
-        <svg class="i i--24"><use href="#i-die"/></svg>
-      </span>
-      <span class="wordmark-spaced">Silicon Empire</span>
-      <h1 class="login-title" id="loginTitle">Sign in</h1>
-      <p class="login-sub">Profiles are stored in this browser. There is no account server and no password.</p>
-    </header>
-
-    <section class="card login-card">
-      <form id="loginForm" novalidate>
-        <div class="field-wrap">
-          <label class="lbl" for="founderName">Your name</label>
-          <input class="field" id="founderName" name="founderName" type="text" autocomplete="off"
-                 spellcheck="false" placeholder="e.g. A. Grove" maxlength="28" required>
-          <p class="field-hint" id="nameHint">Shown as “by …” on your company plate.</p>
-        </div>
-        <button class="btn btn--solid btn--wide" type="submit" id="enterBtn">
-          Enter
-          <svg class="i i--16" aria-hidden="true"><use href="#i-arrow"/></svg>
-        </button>
-      </form>
-
-      <div class="profiles" id="profilesWrap" hidden>
-        <div class="profiles__head">
-          <span class="lbl">Existing profiles</span>
-          <span class="footnote" id="profileCount"></span>
-        </div>
-        <div id="profileList" role="list"></div>
-      </div>
-    </section>
-
-    <footer class="login-foot">
-      <span class="footnote">build 0.1 · planning</span>
-      <span class="footnote" aria-hidden="true">·</span>
-      <span class="footnote">1990 — 2026</span>
-    </footer>
-  </div>
-</main>
-
-<!-- ═══════════════════════════════ MAIN MENU ═══════════════════════════════ -->
-<main class="screen screen--menu" id="screen-menu" aria-labelledby="companyName">
+<!-- ═════════════════════════════ MAIN MENU ═════════════════════════════ -->
+<main class="screen screen--menu" id="screen-menu" aria-labelledby="menuCompany">
   <section class="menu-left">
     <div class="blueprint-bg" aria-hidden="true"></div>
 
     <div class="menu-brand">
       <span class="wordmark-spaced">Silicon Empire</span>
       <div class="company-block">
-        <h1 class="company-name" id="companyName">Untitled Company</h1>
-        <p class="company-founded">
-          founded <b>1990</b> · by <b id="menuFounder">—</b>
+        <h1 class="company-name" id="menuCompany">Untitled Company</h1>
+        <p class="company-founded" id="menuFounded">
+          founded <b>1990</b> · by <b>—</b>
         </p>
       </div>
     </div>
 
     <figure class="menu-art" aria-hidden="true">
       <svg viewBox="0 0 300 300" role="presentation">
-        <!-- wafer -->
         <circle class="wafer-edge" cx="150" cy="150" r="118"/>
         <circle class="wafer-edge" cx="150" cy="150" r="106" opacity=".25"/>
-        <!-- flat -->
         <path class="wafer-edge" d="M118 267.5h64" stroke-width="2.4"/>
-        <!-- die grid -->
         <g id="waferDies"></g>
-        <!-- annotations -->
         <text class="wafer-note" x="16" y="20">FIG. 0 — 300 MM WAFER</text>
         <text class="wafer-note" x="16" y="292">YIELD 87.4%</text>
         <text class="wafer-note" x="212" y="292">SHEET 01</text>
@@ -149,8 +169,8 @@
 
     <div class="menu-left-foot">
       <span class="pill pill--bp"><svg class="i i--16" aria-hidden="true"><use href="#i-wafer"/></svg> Fabless</span>
-      <span class="pill">Week 1 · 1990</span>
-      <span class="pill">$4.2M seed</span>
+      <span class="pill" id="menuWeekPill">Week 1 · 1990</span>
+      <span class="pill" id="menuCashPill">$4.2M seed</span>
     </div>
   </section>
 
@@ -169,7 +189,198 @@
 
     <div class="menu-right-foot">
       <span class="footnote" id="menuStatus">No save in this profile</span>
-      <button class="linkish" type="button" data-action="signout">Sign out</button>
+      <button class="linkish" type="button" data-action="signout">Switch profile</button>
+    </div>
+  </aside>
+</main>
+
+<!-- ═════════════════════════════ NEW GAME ═════════════════════════════ -->
+<main class="screen screen--login" id="screen-newgame" aria-labelledby="newGameTitle">
+  <div class="blueprint-bg" aria-hidden="true"></div>
+  <span class="corner corner--tl" aria-hidden="true"></span>
+  <span class="corner corner--tr" aria-hidden="true"></span>
+  <span class="corner corner--bl" aria-hidden="true"></span>
+  <span class="corner corner--br" aria-hidden="true"></span>
+
+  <div class="login-wrap">
+    <header class="login-head">
+      <span class="login-mark" aria-hidden="true">
+        <svg class="i i--24"><use href="#i-die"/></svg>
+      </span>
+      <span class="wordmark-spaced">Silicon Empire</span>
+      <h1 class="login-title" id="newGameTitle">Found your company</h1>
+      <p class="login-sub">January 1990. One fabless startup, a modest chequebook and a rival industry that has no idea who you are yet.</p>
+    </header>
+
+    <section class="card login-card">
+      <form id="newGameForm" novalidate>
+        <div class="field-wrap">
+          <label class="lbl" for="founderName">Founder name</label>
+          <input class="field" id="founderName" name="founderName" type="text" autocomplete="off"
+                 spellcheck="false" placeholder="e.g. A. Grove" maxlength="28">
+          <p class="field-hint" id="nameHint">Printed as “by …” on your company plate.</p>
+        </div>
+
+        <div class="field-wrap">
+          <label class="lbl" for="companyName">Company name</label>
+          <input class="field" id="companyName" name="companyName" type="text" autocomplete="off"
+                 spellcheck="false" placeholder="Untitled Company" maxlength="34">
+          <p class="field-hint">You can rename it later.</p>
+        </div>
+
+        <div class="field-wrap">
+          <label class="lbl" for="seedInput">Seed</label>
+          <input class="field" id="seedInput" name="seed" type="number" inputmode="numeric"
+                 value="1990" min="1" max="999999">
+          <p class="field-hint">Same seed and same choices give the same world.</p>
+        </div>
+
+        <button class="btn btn--solid btn--wide" type="submit" id="foundBtn">
+          Found company
+          <svg class="i i--16" aria-hidden="true"><use href="#i-arrow"/></svg>
+        </button>
+      </form>
+
+      <div class="profiles" id="profilesWrap" hidden>
+        <div class="profiles__head">
+          <span class="lbl">Existing profiles</span>
+          <span class="footnote" id="profileCount"></span>
+        </div>
+        <div id="profileList" role="list"></div>
+      </div>
+    </section>
+
+    <footer class="login-foot">
+      <button class="linkish" type="button" data-action="back-to-menu">← Back to menu</button>
+    </footer>
+  </div>
+</main>
+
+<!-- ═════════════════════════════ THE DESK ═════════════════════════════ -->
+<main class="screen screen--desk" id="screen-desk" aria-label="Company desk">
+  <!-- left sidebar: the device -->
+  <nav class="side" aria-label="Sections">
+    <button class="side__home" type="button" data-action="menu" title="Main menu" aria-label="Main menu">
+      <svg class="i i--24" aria-hidden="true"><use href="#i-home"/></svg>
+    </button>
+
+    <div class="side__nav" id="sideNav"></div>
+
+    <div class="side__foot">
+      <div class="clock">
+        <span class="clock__year" id="clockYear">1990</span>
+        <span class="clock__week" id="clockWeek">W 01</span>
+      </div>
+
+      <div class="batt" id="battery" data-state="ok" title="Cash runway" aria-label="Cash runway">
+        <i class="batt__fill" id="batteryFill"></i>
+      </div>
+      <span class="batt__label" id="batteryLabel">7 yr</span>
+
+      <div class="speed" role="group" aria-label="Simulation speed">
+        <button type="button" data-speed="0" aria-pressed="false" title="Pause">
+          <svg class="i i--16" aria-hidden="true"><use href="#i-pause"/></svg>
+        </button>
+        <button type="button" data-speed="1" aria-pressed="true">1×</button>
+        <button type="button" data-speed="4" aria-pressed="false">4×</button>
+        <button type="button" data-speed="16" aria-pressed="false">16×</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- centre column -->
+  <div class="desk-main">
+    <header class="desk-head">
+      <div class="desk-ident">
+        <span class="wordmark-spaced">Silicon Empire</span>
+        <h1 class="company-name-sm" id="deskCompany">Untitled Company</h1>
+        <p class="company-founded">founded <b id="deskFounded">1990</b> · by <b id="deskFounder">—</b></p>
+      </div>
+
+      <div class="hud" id="hud">
+        <div class="hud__slot" id="hudCashSlot">
+          <span class="hud__label">Cash</span>
+          <span class="hud__row">
+            <span class="hud__value" id="hudCash">$4.20M</span>
+            <span class="hud__delta up" id="hudCashDelta">▲ $0</span>
+          </span>
+        </div>
+        <div class="hud__slot hud__slot--rp">
+          <span class="hud__label">Research</span>
+          <span class="hud__row">
+            <span class="hud__value" id="hudRp">0 RP</span>
+            <span class="hud__delta" id="hudRpRate">+0/wk</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- centre: diorama -->
+    <section class="desk-centre" aria-label="Current activity">
+      <div class="desk-centre__grid" aria-hidden="true"></div>
+
+      <svg class="dio" id="dio" viewBox="0 0 320 320" role="img" aria-labelledby="dioTitle">
+        <defs>
+          <clipPath id="dioClip">
+            <rect id="dioClipRect" x="0" y="320" width="320" height="0"/>
+          </clipPath>
+        </defs>
+
+        <!-- empty vessel -->
+        <use href="#art-die" class="dio-base"/>
+
+        <!-- liquid fill -->
+        <g clip-path="url(#dioClip)">
+          <use href="#art-die" class="dio-fill"/>
+          <rect class="dio-fill dio-fill--solid" x="30" y="30" width="260" height="260" rx="14"/>
+          <circle class="dio-bubble" cx="120" cy="286" r="3.2"/>
+          <circle class="dio-bubble" cx="158" cy="292" r="2.4"/>
+          <circle class="dio-bubble" cx="196" cy="288" r="2.8"/>
+          <circle class="dio-bubble" cx="234" cy="294" r="2.2"/>
+        </g>
+
+        <!-- wave at the seam -->
+        <path class="dio-wave" id="dioWave" d=""/>
+      </svg>
+
+      <div class="dio-caption">
+        <h2 class="dio-title" id="dioTitle">Researching <em>L3 Cache</em></h2>
+        <p class="dio-sub" id="dioSub">62% · 9 wk left · W 41</p>
+      </div>
+    </section>
+
+    <!-- bottom: recent -->
+    <section class="recent" aria-label="Recent">
+      <div class="recent__head">
+        <span class="lbl">Recent</span>
+        <span class="footnote" id="recentCount">—</span>
+      </div>
+      <div class="recent__scroller" id="recentScroller"></div>
+    </section>
+  </div>
+
+  <!-- right rail -->
+  <aside class="rail" aria-label="Finances">
+    <div class="profit">
+      <div class="profit__row">
+        <span class="profit__label">Profit · month</span>
+        <span class="profit__value" id="profitMonth">$0</span>
+      </div>
+      <div class="profit__row">
+        <span class="profit__label">Profit · year</span>
+        <span class="profit__value" id="profitYear">$0</span>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card__head">
+        <span class="lbl">Earnings</span>
+        <span class="footnote">52 wk</span>
+      </div>
+      <div class="chart-card__body">
+        <svg class="chart" id="earningsChart" viewBox="0 0 320 180" preserveAspectRatio="none" role="img" aria-label="Weekly earnings by product"></svg>
+      </div>
+      <div class="chart__legend" id="chartLegend"></div>
     </div>
   </aside>
 </main>
