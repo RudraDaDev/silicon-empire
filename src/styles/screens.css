@@ -147,103 +147,124 @@ body[data-screen="menu"] #view-menu,
 body[data-screen="newgame"] #view-newgame,
 body[data-screen="desk"] #view-desk { display: grid; }
 
-/* ═════════════════ menu ═════════════════ */
+/* ═════════════════ menu ═════════════════
+   An entry screen, not a dashboard: no sidebar, no company card, one column
+   of rows. Lime is left to a single mark and the row that is next. */
+
+body[data-screen="menu"] .app,
+body[data-screen="newgame"] .app { grid-template-columns: minmax(0, 1fr); }
+
+body[data-screen="menu"] .side,
+body[data-screen="newgame"] .side { display: none; }
 
 #view-menu {
-  grid-template-rows: auto auto 1fr;
-  gap: 16px;
-  padding: 20px 22px;
+  place-items: start center;
+  padding: 42px 24px 36px;
   overflow: auto;
 }
 
-.menu-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+/* the index is ~700px tall; centre it only when that cannot overflow the
+   scroll container, otherwise keep it at the top so nothing is clipped */
+@media (min-height: 780px) {
+  #view-menu { place-items: center; }
+}
 
-.hero {
-  position: relative;
-  padding: 20px 22px;
-  border: var(--bw) solid var(--ink);
-  border-radius: var(--r);
+.menu-wrap {
+  width: min(560px, 100%);
+  display: grid;
+  gap: 26px;
+}
+
+.menu-head { display: grid; gap: 9px; }
+
+.menu-brand { display: flex; align-items: center; gap: 9px; }
+.menu-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2.5px solid var(--ink);
+  border-radius: 6px;
   background: var(--lime);
   color: var(--lime-ink);
-  box-shadow: 8px 8px 0 var(--shadow-c);
 }
-.hero__label {
-  font-size: 11.5px;
-  font-weight: 900;
-  letter-spacing: .1em;
-  text-transform: lowercase;
-  opacity: .7;
-}
-.hero__name {
-  font-size: clamp(30px, 4.2vw, 48px);
+
+.menu-title {
+  font-size: clamp(30px, 4.2vw, 44px);
   font-weight: 900;
   letter-spacing: -.045em;
-  line-height: 1;
-  margin: 6px 0 8px;
+  line-height: 1.02;
   text-transform: lowercase;
+  overflow-wrap: anywhere;
 }
-.hero__meta {
+
+.menu-meta {
   font-size: 12.5px;
-  font-weight: 800;
+  font-weight: 700;
+  color: var(--ink-soft);
   text-transform: lowercase;
-  opacity: .82;
-}
-.hero__profile {
-  position: absolute;
-  top: 16px; right: 16px;
-  display: grid; place-items: center;
-  width: 44px; height: 44px;
-  border: var(--bw) solid var(--lime-ink);
-  border-radius: 50%;
-  background: var(--panel);
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 900;
-  transform: rotate(-8deg);
-  box-shadow: var(--shadow-xs);
 }
 
-.menu-grid {
+/* the list: rows on rules, nothing floating */
+.menu-list {
+  border-top: var(--bw) solid var(--ink);
+  border-bottom: var(--bw) solid var(--ink);
+}
+
+.menu-row {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(236px, 1fr));
-  align-content: start;
-}
-
-.menu-btn {
-  display: flex;
+  grid-template-columns: 22px minmax(0, 1fr) 18px;
   align-items: center;
-  gap: 12px;
-  padding: 13px 15px;
-  border: var(--bw) solid var(--ink);
-  border-radius: var(--r-sm);
-  background: var(--panel);
+  gap: 14px;
+  width: 100%;
+  padding: 14px 12px;
+  border: 0;
+  border-bottom: 2px solid var(--panel-3);
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease);
 }
-.menu-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shadow-c); background: var(--panel-2); }
-.menu-btn:active { transform: translate(4px, 4px); box-shadow: none; }
-.menu-btn[data-disabled="true"] { opacity: .42; box-shadow: none; }
+.menu-row:last-child { border-bottom: 0; }
+.menu-row:hover { background: var(--panel-2); }
+.menu-row:hover .menu-row__arrow { transform: translateX(4px); opacity: 1; }
 
-.menu-btn__icon {
-  display: grid; place-items: center;
-  width: 40px; height: 40px; flex: none;
-  border: var(--bw) solid var(--ink);
-  border-radius: var(--r-sm);
-  background: var(--panel-2);
+.menu-row__icon { color: var(--ink-soft); }
+.menu-row__body { display: grid; gap: 2px; min-width: 0; }
+.menu-row__label {
+  font-size: 16.5px;
+  font-weight: 900;
+  letter-spacing: -.015em;
+  text-transform: lowercase;
 }
-.menu-btn--primary { background: var(--lime); color: var(--lime-ink); }
-.menu-btn--primary .menu-btn__icon { background: var(--panel); color: var(--ink); }
-.menu-btn--primary .menu-btn__desc { color: var(--lime-ink); opacity: .7; }
-.menu-btn--primary .menu-btn__label { color: var(--lime-ink); }
-.menu-btn--danger .menu-btn__icon { background: var(--coral); color: var(--coral-ink); }
+.menu-row__desc {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: lowercase;
+}
+.menu-row__arrow {
+  justify-self: end;
+  opacity: .4;
+  transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
 
-.menu-btn__body { display: grid; gap: 2px; min-width: 0; }
-.menu-btn__label { font-size: 16px; font-weight: 900; text-transform: lowercase; letter-spacing: -.01em; }
-.menu-btn__desc { font-size: 11.5px; font-weight: 700; color: var(--ink-faint); text-transform: lowercase; }
+/* the next thing to press gets a lime edge, nothing more */
+.menu-row[data-next="true"] { box-shadow: inset 4px 0 0 var(--lime); }
+
+.menu-row[data-disabled="true"] { opacity: .38; cursor: not-allowed; }
+.menu-row[data-disabled="true"]:hover { background: transparent; }
+.menu-row[data-disabled="true"]:hover .menu-row__arrow { transform: none; opacity: .4; }
+
+.menu-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.menu-foot .lbl { color: var(--ink-soft); }
 
 /* ═════════════════ new game ═════════════════ */
 
@@ -271,6 +292,14 @@ body[data-screen="desk"] #view-desk { display: grid; }
 }
 
 .newgame-head { display: grid; gap: 5px; }
+
+.newgame-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
 .newgame-title {
   font-size: 34px;
   font-weight: 900;
@@ -334,7 +363,7 @@ body[data-screen="desk"] #view-desk { display: grid; }
    fills collapses — measured, not guessed:
    · sidebar gutter needs ~120px of nav band left over, below 560px tall
      the nav items push into it
-   · menu leftover closes up once the buttons wrap on narrow screens
+   · the menu hatch needs room beside the 560px index
    (the founding screen carries no texture: its side margins are tall but
    narrow, so any pattern there reads as corduroy rather than surface) */
 
@@ -343,7 +372,7 @@ body[data-screen="desk"] #view-desk { display: grid; }
 }
 
 @media (max-width: 899px), (max-height: 639px) {
-  .menu-grid.pat { background-image: none; }
+  #view-menu.pat { background-image: none; }
 }
 
 @media (max-width: 720px) {

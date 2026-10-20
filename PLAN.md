@@ -428,6 +428,8 @@ Both are **persistent, global, top-right, same position on every screen**. Not p
 - Shows `+96/wk` accrual rate in 10.5px mono, dimmed. Rate matters more than balance for planning: "how long until I can afford that node".
 - On the **Lab** screen the HUD gains a third state — RP stays top-right, but each tech node also shows its own cost, and a sticky sub-line reads `1,240 RP · 13 wk to next tier at current rate`. Costs are shown where they're spent, never only in the HUD.
 
+**Entry screens have no chrome.** The main menu and the founding form are the only two screens without a sidebar or HUD. Before a company exists there is no clock, no runway and no section to navigate to, so a column of disabled icons is noise on what is really a login screen. The menu is one column of rows on ink rules — wordmark, the company (or "no company yet"), then the list — with lime spent only on a 26px mark and a 4px edge on the row that is actually next. The sidebar arrives with the desk.
+
 **Why not the sidebar.** The 84px column is already carrying nav, clock, battery and speed controls. Cramming money into it would force the most important number in the game into a 10px font in a corner. The sidebar is the *device*; the HUD is the *company*. Keep them separate.
 
 **Why not the right rail.** The rail scrolls, collapses below 1080px, and is home-only. Cash must survive every one of those states. So the HUD lives in the header, which is the one element that is always present — and on sub-screens the header persists in compact form (back glyph + screen title + the same two readouts).

@@ -137,32 +137,36 @@ function renderMenu() {
   $('#menuMeta').textContent = profile
     ? `founded 1990 · by ${profile.name}`
     : 'start a new game to found one';
-  const badge = $('#menuProfile');
-  badge.hidden = !profile;
-  badge.textContent = profile ? initials(profile.name) : '';
   $('#menuStatus').textContent = save
     ? `${saves.length} save${saves.length === 1 ? '' : 's'} · week ${save.week}`
     : 'no save';
 
-  const grid = $('#menuGrid');
-  grid.replaceChildren(...MENU.map((item) => {
+  // the row that is actually the next move wears the accent, so a disabled
+  // continue never looks like the thing to press
+  const nextId = save ? 'continue' : 'new';
+
+  const list = $('#menuGrid');
+  list.replaceChildren(...MENU.map((item) => {
     const disabled = item.needsSave && !save;
     const button = el('button', {
-      class: `menu-btn${item.primary ? ' menu-btn--primary' : ''}${item.danger ? ' menu-btn--danger' : ''}`,
+      class: 'menu-row',
       type: 'button',
       'data-disabled': disabled ? 'true' : 'false',
+      'data-next': !disabled && item.id === nextId ? 'true' : 'false',
+      'aria-disabled': disabled ? 'true' : null,
       onclick: () => (disabled
         ? toast('no save yet — start a new game', { warn: true })
         : runMenu(item.id)),
     });
     button.innerHTML = `
-      <span class="menu-btn__icon">${icon(item.icon)}</span>
-      <span class="menu-btn__body">
-        <span class="menu-btn__label"></span>
-        <span class="menu-btn__desc"></span>
-      </span>`;
-    button.querySelector('.menu-btn__label').textContent = item.label;
-    button.querySelector('.menu-btn__desc').textContent = disabled ? 'no save yet' : item.desc;
+      <span class="menu-row__icon">${icon(item.icon)}</span>
+      <span class="menu-row__body">
+        <span class="menu-row__label"></span>
+        <span class="menu-row__desc"></span>
+      </span>
+      <span class="menu-row__arrow">${icon('arrow', '16')}</span>`;
+    button.querySelector('.menu-row__label').textContent = item.label;
+    button.querySelector('.menu-row__desc').textContent = disabled ? 'no save yet' : item.desc;
     return button;
   }));
 }
@@ -575,11 +579,16 @@ function fmtMoney(n) {
 
 /* ── keyboard ─────────────────────────────────────────────── */
 
+function goMenu() {
+  if (state.screen === 'desk') stopClock();
+  go('menu');
+}
+
 document.addEventListener('keydown', (event) => {
   const modalOpen = !$('#modalHost').hidden;
   if (event.key !== 'Escape') return;
   if (modalOpen) { closeModal(); return; }
-  if (state.screen === 'desk') { stopClock(); go('menu'); }
+  if (state.screen === 'desk' || state.screen === 'newgame') goMenu();
 });
 
 /* ── boot ─────────────────────────────────────────────────── */
@@ -596,6 +605,7 @@ function boot() {
     hint.textContent = 'prints as “by …” on your company plate';
   });
 
+  document.querySelectorAll('[data-action="menu"]').forEach((b) => b.addEventListener('click', goMenu));
   document.querySelectorAll('[data-action="settings"]').forEach((b) => b.addEventListener('click', openSettings));
   document.querySelectorAll('[data-action="data"]').forEach((b) => b.addEventListener('click', openData));
   document.querySelectorAll('.time button').forEach((b) => b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))));

@@ -123,7 +123,7 @@
 </svg>
 
 <div class="app">
-  <!-- ═════════ sidebar — present on every screen ═════════ -->
+  <!-- ═════════ sidebar — the desk only; entry screens are chrome-free ═════════ -->
   <aside class="side">
     <button class="side__logo" type="button" data-action="menu" title="Main menu" aria-label="Main menu">
       <svg class="i i--24" aria-hidden="true"><use href="#i-die"/></svg>
@@ -155,26 +155,36 @@
 
   <main class="app-main">
     <!-- ═════════ menu ═════════ -->
-    <section class="view" id="view-menu" aria-label="Main menu">
-      <div class="menu-top">
-        <span class="wordmark">silicon empire</span>
-        <span class="pill" id="menuStatus">no save</span>
-      </div>
+    <section class="view pat pat--hatch" id="view-menu" aria-label="Main menu">
+      <div class="menu-wrap">
+        <header class="menu-head">
+          <div class="menu-brand">
+            <span class="menu-mark" aria-hidden="true"><svg class="i i--16"><use href="#i-die"/></svg></span>
+            <span class="wordmark">silicon empire</span>
+          </div>
+          <h1 class="menu-title" id="menuCompany">no company yet</h1>
+          <p class="menu-meta" id="menuMeta">start a new game to found one</p>
+        </header>
 
-      <div class="hero">
-        <span class="hero__label">your company</span>
-        <h1 class="hero__name" id="menuCompany">untitled company</h1>
-        <p class="hero__meta" id="menuMeta">founded 1990 · by —</p>
-        <span class="hero__profile" id="menuProfile">—</span>
-      </div>
+        <nav class="menu-list" id="menuGrid" aria-label="Main menu"></nav>
 
-      <nav class="menu-grid pat pat--hatch" id="menuGrid" aria-label="Main menu"></nav>
+        <footer class="menu-foot">
+          <span class="lbl" id="menuStatus">no save</span>
+          <span class="lbl">build 0.1 · planning</span>
+        </footer>
+      </div>
     </section>
 
     <!-- ═════════ new game ═════════ -->
     <section class="view" id="view-newgame" aria-label="New game">
       <header class="newgame-head">
-        <span class="wordmark">silicon empire</span>
+        <div class="newgame-top">
+          <button class="btn btn--ghost btn--sm" type="button" data-action="menu">
+            <svg class="i i--16" aria-hidden="true"><use href="#i-home"/></svg>
+            menu
+          </button>
+          <span class="wordmark">silicon empire</span>
+        </div>
         <h1 class="newgame-title">found your company</h1>
         <p class="newgame-sub">january 1990. one fabless startup, a modest chequebook, and an industry that has no idea who you are yet.</p>
       </header>
