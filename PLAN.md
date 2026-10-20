@@ -2,7 +2,8 @@
 
 **Status:** plan / pre-code. Nothing here is implemented yet.
 **Branch:** `arena/1cf6c425-silicon-empire`
-**Source research:** `SILICON_EMPIRE_COMPLETE.md` (8k words of real 1990–2026 specs, fab economics, market math, rival profiles)
+**Source research:** `SILICON_EMPIRE_COMPLETE.md` (8k words of real 1990–2026 specs, fab economics, market math, rival profiles). The game runs to **2055**; everything after 2026 is authored speculation, not researched history.
+**Run length:** January 1990 → December 2055, then it stops. 66 years, 3,432 ticks, ~25–30 product generations.
 
 ---
 
@@ -76,7 +77,7 @@ silicon-empire/
 │   ├── data/
 │   │   ├── schema/            # one JSON Schema for all products — boot refuses invalid data
 │   │   ├── catalog/           # 109 product definitions (DOMAINS.md §2–3)
-│   │   ├── process-nodes.json # 1990→2026 nodes, D0 curves, capex
+│   │   ├── process-nodes.json # 1990→2055 nodes, D0 curves, capex
 │   │   ├── tech-tree.json     # nodes: cost, prereqs, earliestYear, effects
 │   │   ├── brands.json        # ~132 brands, personalities, traits, gates
 │   │   ├── interfaces.json    # DDR/PCIe/USB-PD/socket generations
@@ -184,7 +185,7 @@ serialize(state) / deserialize(json)              // -> string / state
 **The loop is one sentence: read the market, commit silicon to a bet, live with it.**
 The heartbeat is the product generation, not the week — design → tape-out → ramp →
 launch → harvest → obsolete, two to three years each, twelve to fifteen of them
-between 1990 and 2026.
+between 1990 and 2055.
 
 Two clocks run at once. **Money is weekly. Silicon is 6–18 months.** The gap between
 them — spending today for revenue that may arrive after the window has shut — is the
@@ -308,14 +309,36 @@ Cause must precede effect or the numbers stop being learnable.
 - Net effect: one real decision every 4–8 game weeks, two to four minutes of play per
   generation at 4×.
 
-### 3b.6 What this changes
+### 3b.6 The late game, and the stop
+
+The game **ends at 2055** — it does not run forever, and it does not fade out. Two
+mechanical reasons, both stated so they can be tuned rather than discovered late:
+
+- **Each node costs more than the last.** Capex, NRE and R&D per generation climb
+  super-linearly, so a single product is a bet the size of a company by the 2040s. The
+  endgame is capital allocation under scarcity, not a victory lap.
+- **Generations get slower.** Lead times lengthen as processes get harder, so 25–30
+  generations become 12–15 decisions by the end.
+
+**The stop is a scorecard, not a fade.** At week 3,432 the run closes on: final
+valuation, peak valuation, share by segment, generations shipped, best-selling product,
+reviews mean, survival weeks, and the full log. No endless mode — the date is the point,
+because "tech is expensive and unfun after 2055" is a design judgement worth defending
+in the UI rather than a wall the player hits by accident.
+
+**Post-2026 is speculative content.** Real history runs out at the research boundary, so
+2027–2055 draws on authored tech trajectories, and its events are generated from a
+plausible pool rather than seeded from dated fact. Brands with `gate.year > 2026` are
+fictional only — no real company is projected into a future it has not had.
+
+### 3b.7 What this changes
 
 §6's vertical slice currently starts at a fabless CPU designer. It should start at the
 bedroom, run act 0 → gate → shuttle → first fabbed product, and reach CPUs as act 2.
 The slice gets longer but the first ten minutes teach BOM, yield, reviews, runway and
 contract reading instead of dropping the player into a fab they cannot afford.
 
-**Open:** whether events pause or default; whether 2026 is a hard stop.
+**Open:** whether events pause or default.
 
 ---
 
@@ -325,10 +348,14 @@ contract reading instead of dropping the player into a fab they cannot afford.
 screen for you; every answer ends in a pointer to where *you* would do the thing. That
 restriction is the feature — an assistant that acts removes the game.
 
-**Diegetic cover for a 1990 setting:** PIP is a **rule-based expert system** distributed
-on shareware disks, running in a terminal window on the rig. That explains, in one line,
-why it is available at 18 with no money, why it is confident, and why it is sometimes
-wrong. It is not a language model and the game never pretends otherwise.
+**PIP is not a piece of the timeline.** It is not a 1990 product, not a shareware disk,
+not an artefact that ages with the calendar — it is the player's assistant, on screen
+from tick one of an 18-year-old's bedroom and identical in 2054. It sits outside the
+fiction's history so it can be useful in all of it.
+
+**Its job is to help.** The player should come away better informed after every
+conversation: a number they did not know, a consequence they had not considered, a
+risk worth checking. What it must never do is *decide* — advice is its ceiling.
 
 **It knows only what is public:** segment sizes, prices, your own books, the news feed,
 the catalogue. Rival cash, roadmaps and margins are invisible until the browser screen
@@ -349,6 +376,7 @@ can therefore never perturb the sim, and a golden-file test can pin its answers.
 | Kind | Example | Behaviour |
 |---|---|---|
 | **Recall** | "what did I spend on resin in march" | exact, from your books |
+| **Advise** | "should I buy a second rig" | lays out the arithmetic and the risk, recommends nothing outright |
 | **Explain** | "why did reviews drop" | cites the 2–3 biggest contributions, no single opaque score |
 | **Predict** | "will dram prices rise this quarter" | always ships a confidence and a basis |
 | **Refuse** | "sign the fab deal for me" | declines in character, points at the screen |
@@ -372,18 +400,23 @@ its market timing, and that knowledge is earned, not granted.
 
 ### 3c.4 What it refuses to do
 
-- **Contracts.** PIP will not read a supplier page for you: "that is a lawyer's job."
-  Once you hire one, the lawyer annotates the sheet and PIP can discuss it — reading is
-  still your job in act 0/1, which is where the mechanic is taught.
+- **Contracts.** PIP helps without reading for you: it explains jargon (people don't know
+  what NRE or net-60 is), says what a clause *does* in plain words, and names the
+  trade-off in generic terms — but it will not tell you whether a particular page is a
+  good deal. That judgement stays with you, which is where the mechanic lives. A hired
+  contracts lawyer annotates the page itself.
 - **Actions.** No auto-pricing, no auto-hiring, no "fix it" button.
 - **Hidden state.** No rival internals, ever.
 - **Guarantees.** No answer phrased as certainty, even when it is right.
 
 ### 3c.5 Where it lives
 
-The drawer's `pip` entry opens a panel: a transcript, a suggested-questions row (so the
-player learns what it can answer without guessing syntax), and the track record. It also
-appears as a one-line aside on event modals — never as a replacement for the decision.
+The drawer's `pip` entry opens a panel: a transcript, a row of suggested questions (so
+the player never has to guess syntax), and the track record. It also puts one line on
+event modals — never in place of the decision.
+
+**Availability never gates progress.** If the player never opens PIP, every screen is
+still fully playable; PIP is the difference between a good decision and a lucky one.
 
 ### 3c.6 Integration seam
 
