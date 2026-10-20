@@ -2,15 +2,17 @@
 
 .app {
   display: grid;
-  grid-template-columns: 106px minmax(0, 1fr);
+  grid-template-columns: var(--side-w) minmax(0, 1fr);
   height: 100vh;
   overflow: hidden;
 }
 
 /* ── sidebar ─────────────────────────────────────────────── */
 .side {
+  position: relative;
+  z-index: 50;            /* the drawer slides out from under this */
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   gap: 10px;
   padding: 12px 8px;
   background: var(--panel);
@@ -26,8 +28,8 @@
   margin: 0 auto;
   border: var(--bw) solid var(--ink);
   border-radius: var(--r-sm);
-  background: var(--lime);
-  color: var(--lime-ink);
+  background: var(--accent);
+  color: var(--accent-ink);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
@@ -66,9 +68,9 @@
 .nav-item:hover:not(:disabled) { color: var(--ink); background: var(--panel-2); border-color: var(--ink); }
 
 .nav-item[aria-current="page"] {
-  background: var(--lime);
+  background: var(--accent);
   border-color: var(--ink);
-  color: var(--lime-ink);
+  color: var(--accent-ink);
   box-shadow: var(--shadow-xs);
 }
 .nav-item:disabled { opacity: .3; cursor: not-allowed; }
@@ -122,7 +124,7 @@
   display: block;
   height: 100%;
   width: 60%;
-  background: var(--lime);
+  background: var(--accent);
   transition: width 260ms var(--ease), background var(--dur) var(--ease);
 }
 .batt[data-state="warn"] .batt__fill { background: var(--lemon); }
@@ -135,9 +137,96 @@
   color: var(--ink-faint);
 }
 
+/* the double-arrow that opens the rest of the sections */
+.side__more {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 34px;
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r-sm);
+  background: var(--panel-2);
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+              background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.side__more:hover { color: var(--ink); transform: translate(-1px, -1px); box-shadow: var(--shadow-sm); }
+.side__more:active { transform: translate(2px, 2px); box-shadow: none; }
+.side__more .i { transition: transform 240ms cubic-bezier(.22,.82,.3,1); }
+.side__more.is-open { background: var(--accent); border-color: var(--ink); color: var(--accent-ink); }
+.side__more.is-open .i { transform: rotate(180deg); }
+
 .side__tools { display: flex; gap: 5px; }
 .side__tools .icon-btn { width: 29px; height: 29px; border-width: 2.5px; border-radius: 7px; box-shadow: none; }
 .side__tools .icon-btn .i { width: 15px; height: 15px; }
+
+/* ═════════════ sections drawer ═════════════
+   Closed it sits under the rail (same width, shifted a full width left);
+   opening slides it right, closing slides it back. */
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: var(--side-w);
+  width: 252px;
+  z-index: 40;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--panel);
+  border-right: var(--bw) solid var(--ink);
+  box-shadow: 7px 0 0 rgb(0 0 0 / .5);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 260ms cubic-bezier(.22, .82, .3, 1), visibility 0s 260ms;
+}
+.drawer.is-open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 260ms cubic-bezier(.22, .82, .3, 1), visibility 0s 0s;
+}
+
+.drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 12px 12px 14px;
+  border-bottom: var(--bw) solid var(--ink);
+  background: var(--panel-2);
+}
+.drawer__close { width: 30px; height: 30px; border-width: 2.5px; box-shadow: none; }
+.drawer__close .i { transform: rotate(180deg); }
+
+.drawer__list { overflow: auto; padding: 4px 0; }
+
+.drawer-item {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 900;
+  letter-spacing: -.005em;
+  text-transform: lowercase;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.drawer-item:hover { background: var(--panel-2); color: var(--ink); }
+.drawer-item[aria-current="page"] {
+  background: var(--panel-3);
+  color: var(--ink);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
 
 /* main column */
 .app-main { min-width: 0; min-height: 0; overflow: hidden; }
@@ -185,8 +274,8 @@ body[data-screen="newgame"] .side { display: none; }
   height: 26px;
   border: 2.5px solid var(--ink);
   border-radius: 6px;
-  background: var(--lime);
-  color: var(--lime-ink);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .menu-title {
@@ -251,8 +340,8 @@ body[data-screen="newgame"] .side { display: none; }
   transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
 }
 
-/* the next thing to press gets a lime edge, nothing more */
-.menu-row[data-next="true"] { box-shadow: inset 4px 0 0 var(--lime); }
+/* the next thing to press gets an accent edge, nothing more */
+.menu-row[data-next="true"] { box-shadow: inset 4px 0 0 var(--accent); }
 
 .menu-row[data-disabled="true"] { opacity: .38; cursor: not-allowed; }
 .menu-row[data-disabled="true"]:hover { background: transparent; }
@@ -349,8 +438,8 @@ body[data-screen="newgame"] .side { display: none; }
   width: 32px; height: 32px; flex: none;
   border: 2.5px solid var(--ink);
   border-radius: 50%;
-  background: var(--lime);
-  color: var(--lime-ink);
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 11.5px; font-weight: 900;
 }
 .profile__body { flex: 1; min-width: 0; }
@@ -376,6 +465,6 @@ body[data-screen="newgame"] .side { display: none; }
 }
 
 @media (max-width: 720px) {
-  .app { grid-template-columns: 80px minmax(0, 1fr); }
+  :root { --side-w: 80px; }
   .nav-item__label { display: none; }
 }

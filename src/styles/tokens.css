@@ -14,26 +14,34 @@
 
   --shadow-c: #000000;
 
-  --lime: #C8F751;
-  --lime-ink: #10200A;
+  --accent: #6FD0FF;
+  --accent-ink: #06202E;
   --coral: #FF6B4A;
   --coral-ink: #2B0C05;
-  --sky: #6FD0FF;
-  --sky-ink: #061E2A;
   --violet: #B49CFF;
+  --violet-ink: #150B36;
   --lemon: #FFE24A;
+  --lemon-ink: #2B2400;
+  --rose: #FF9DB8;
+  --rose-ink: #360B19;
 
   --art-dim: #4C453C;
   --art-fill: #F7F2E7;
 
+  --series-1: #6FD0FF;
+  --series-2: #B49CFF;
+  --series-3: #FF9DB8;
+
   /* geometric fills — kept near-invisible so they read as surface, not content */
   --pat-line: rgba(247, 242, 231, .10);
   --pat-line-2: rgba(247, 242, 231, .16);
-  --pat-accent: rgba(200, 247, 81, .16);
+  --pat-accent: rgba(111, 208, 255, .18);
 
   /* readable accent *text* (fills keep the saturated colour) */
-  --pos: #C8F751;
+  --pos: #6FD0FF;
   --neg: #FF6B4A;
+
+  --side-w: 106px;
 
   --bw: 3px;
   --r: 10px;
@@ -64,22 +72,28 @@
 
   --shadow-c: #12100C;
 
-  --lime: #C6F24E;
-  --lime-ink: #12100C;
+  --accent: #38BDF8;
+  --accent-ink: #04202C;
   --coral: #FF5C43;
   --coral-ink: #12100C;
-  --sky: #4FC3F7;
-  --sky-ink: #12100C;
-  --violet: #9B7BFF;
-  --lemon: #FFD93D;
+  --violet: #7B5AF0;
+  --violet-ink: #12100C;
+  --lemon: #A87900;
+  --lemon-ink: #12100C;
+  --rose: #C2185B;
+  --rose-ink: #12100C;
 
   --art-dim: #C6B9A3;
   --art-fill: #12100C;
 
+  --series-1: #0B7FA8;
+  --series-2: #6B45D9;
+  --series-3: #C2185B;
+
   --pat-line: rgba(18, 16, 12, .10);
   --pat-line-2: rgba(18, 16, 12, .18);
-  --pat-accent: rgba(44, 107, 0, .18);
+  --pat-accent: rgba(11, 92, 122, .18);
 
-  --pos: #2C6B00;
+  --pos: #0B5C7A;
   --neg: #B8341B;
 }

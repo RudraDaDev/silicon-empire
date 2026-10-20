@@ -83,6 +83,37 @@
     <circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1" fill="currentColor"/>
   </symbol>
   <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3.4v8"/><path d="M17.6 6.2a7.6 7.6 0 1 1-11.2 0"/></symbol>
+  <symbol id="i-megaphone" viewBox="0 0 24 24">
+    <path d="M4.6 9.6v4.8l9.2 4.6V5z"/>
+    <path d="M6.9 15.2v3.4c0 .7.5 1.2 1.2 1.2h1.4v-2.9"/>
+    <path d="M16.8 9.4a4 4 0 0 1 0 5.2M19.2 7.2a7.4 7.4 0 0 1 0 9.6"/>
+  </symbol>
+  <symbol id="i-browser" viewBox="0 0 24 24">
+    <rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.2"/>
+    <path d="M3.4 9.4h17.2"/>
+    <path d="M6.6 7h.1M9 7h.1" stroke-width="2.4"/>
+    <path d="M7.2 12.6h6.4M7.2 15.6h9.2"/>
+  </symbol>
+  <symbol id="i-user" viewBox="0 0 24 24">
+    <circle cx="12" cy="8.4" r="3.6"/>
+    <path d="M4.7 20.2c.9-3.7 3.8-5.6 7.3-5.6s6.4 1.9 7.3 5.6"/>
+  </symbol>
+  <symbol id="i-contract" viewBox="0 0 24 24">
+    <path d="M6.2 4.2h7.6l4 4v11.6H6.2z"/>
+    <path d="M13.8 4.2v4h4"/>
+    <path d="M8.9 17.1c1.1-1.6 2.2-1.6 3.2 0s2.1 1.6 3.1 0"/>
+    <path d="M8.9 11.4h4.4"/>
+  </symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24">
+    <rect x="5.4" y="4.8" width="13.2" height="15.6" rx="2"/>
+    <path d="M8.8 3.4h6.4v3.2H8.8z"/>
+    <path d="M9 12.2l1.9 1.9 3.6-3.9"/>
+    <path d="M9 17.1h6"/>
+  </symbol>
+  <symbol id="i-chevrons" viewBox="0 0 24 24">
+    <path d="M6.2 5.8 12.4 12l-6.2 6.2"/>
+    <path d="M12.6 5.8 18.8 12l-6.2 6.2"/>
+  </symbol>
 
   <!-- Diorama artwork. Everything inherits currentColor so the filled
        portion renders identically to the outline, just brighter. -->
@@ -131,6 +162,11 @@
 
     <nav class="side__nav pat pat--dots" id="sideNav" aria-label="Sections"></nav>
 
+    <button class="side__more" id="sideMore" type="button"
+            aria-expanded="false" aria-controls="drawer" title="All sections" aria-label="All sections">
+      <svg class="i i--20" aria-hidden="true"><use href="#i-chevrons"/></svg>
+    </button>
+
     <div class="side__foot">
       <div class="clock">
         <span class="clock__year" id="clockYear">1990</span>
@@ -152,6 +188,17 @@
       </div>
     </div>
   </aside>
+
+  <!-- ═════════ sections drawer — slides out from under the sidebar ═════════ -->
+  <div class="drawer" id="drawer" aria-label="All sections" aria-hidden="true">
+    <header class="drawer__head">
+      <span class="lbl">all sections</span>
+      <button class="icon-btn drawer__close" type="button" id="drawerClose" aria-label="Close sections">
+        <svg class="i i--16" aria-hidden="true"><use href="#i-chevrons"/></svg>
+      </button>
+    </header>
+    <nav class="drawer__list" id="drawerNav" aria-label="All sections"></nav>
+  </div>
 
   <main class="app-main">
     <!-- ═════════ menu ═════════ -->
@@ -211,7 +258,7 @@
           <p class="field-hint">same seed and same choices give the same world</p>
         </div>
 
-        <button class="btn btn--lime btn--wide" type="submit" id="foundBtn">
+        <button class="btn btn--accent btn--wide" type="submit" id="foundBtn">
           found company
           <svg class="i i--16" aria-hidden="true"><use href="#i-arrow"/></svg>
         </button>

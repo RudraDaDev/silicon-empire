@@ -11,6 +11,7 @@ import {
   initials, timeAgo, bytesLabel,
 } from './app/store.js';
 import { mountDesk } from './ui/desk.js';
+import { PRIMARY, MORE, sectionButton, markCurrent } from './ui/sections.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, props = {}, ...children) => {
@@ -71,6 +72,7 @@ function toast(message, { warn = false, ms = 3200 } = {}) {
 function go(screen) {
   state.screen = screen;
   document.body.dataset.screen = screen;
+  if (screen !== 'desk') setDrawer(false);
   renderSidebar();
 
   if (screen === 'menu') renderMenu();
@@ -80,29 +82,40 @@ function go(screen) {
 
 /* ── sidebar (all screens) ────────────────────────────────── */
 
-const NAV = [
-  ['design', 'ruler', 'design'], ['lab', 'beaker', 'lab'], ['fab', 'wafer', 'fab'],
-  ['market', 'scale', 'market'], ['finance', 'ledger', 'finance'],
-  ['news', 'news', 'news'], ['company', 'company', 'firm'],
-];
+function pickSection(section) {
+  markCurrent(section.id);
+  if (state.screen !== 'desk') return toast('start a game to open a section', { warn: true });
+  return toast(`${section.label} screen is not built yet.`, { warn: true });
+}
+
+/* ── sections drawer ──────────────────────────────────────── */
+
+function setDrawer(open) {
+  const drawer = $('#drawer');
+  const more = $('#sideMore');
+  drawer.classList.toggle('is-open', open);
+  drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+  more.setAttribute('aria-expanded', open ? 'true' : 'false');
+  more.classList.toggle('is-open', open);
+}
+
+const drawerOpen = () => $('#drawer').classList.contains('is-open');
+
+function renderDrawer() {
+  $('#drawerNav').replaceChildren(...MORE.map((section) => {
+    const button = sectionButton(section, { variant: 'drawer', iconSize: 18 });
+    button.addEventListener('click', () => pickSection(section));
+    return button;
+  }));
+}
 
 function renderSidebar() {
   const nav = $('#sideNav');
   const inGame = state.screen === 'desk';
 
-  nav.replaceChildren(...NAV.map(([id, iconName, label]) => {
-    const button = el('button', {
-      class: 'nav-item',
-      type: 'button',
-      disabled: !inGame,
-      title: label,
-      html: `${icon(iconName, '24')}<span class="nav-item__label">${label}</span>`,
-      onclick: () => {
-        [...nav.children].forEach((b) => b.removeAttribute('aria-current'));
-        button.setAttribute('aria-current', 'page');
-        toast(`${label} screen is not built yet.`, { warn: true });
-      },
-    });
+  nav.replaceChildren(...PRIMARY.map((section) => {
+    const button = sectionButton(section, { variant: 'nav', disabled: !inGame });
+    button.addEventListener('click', () => pickSection(section));
     return button;
   }));
 
@@ -392,7 +405,7 @@ function openSaves() {
       ),
       el('div', { class: 'slot__actions' },
         el('button', {
-          class: 'btn btn--lime btn--sm', type: 'button', text: 'load',
+          class: 'btn btn--accent btn--sm', type: 'button', text: 'load',
           onclick: () => { state.save = s; closeModal(); go('desk'); },
         }),
         el('button', {
@@ -411,7 +424,7 @@ function openSaves() {
     title: 'saves',
     body,
     footer: el('button', {
-      class: 'btn btn--lime', type: 'button', text: 'new game',
+      class: 'btn btn--accent', type: 'button', text: 'new game',
       onclick: () => { closeModal(); go('newgame'); },
     }),
   });
@@ -452,7 +465,7 @@ function openSettings() {
   openModal({
     title: 'settings',
     body,
-    footer: el('button', { class: 'btn btn--lime', type: 'button', text: 'done', onclick: closeModal }),
+    footer: el('button', { class: 'btn btn--accent', type: 'button', text: 'done', onclick: closeModal }),
   });
 }
 
@@ -462,13 +475,13 @@ function openCredits() {
   const credit = (term, text) => el('dl', { class: 'credit' }, el('dt', { text: term }), el('dd', { text }));
   const body = el('div', { class: 'credits-list' },
     credit('game', 'silicon empire — a 1990–2026 semiconductor tycoon'),
-    credit('look', 'chunky borders, bold lowercase, lime accent, hand-drawn icons'),
+    credit('look', 'chunky borders, bold lowercase, ice-blue accent, hand-drawn icons'),
     credit('status', 'build 0.2 — menu, new game, desk shell. simulation not wired yet'),
   );
   openModal({
     title: 'credits',
     body,
-    footer: el('button', { class: 'btn btn--lime', type: 'button', text: 'close', onclick: closeModal }),
+    footer: el('button', { class: 'btn btn--accent', type: 'button', text: 'close', onclick: closeModal }),
   });
 }
 
@@ -534,7 +547,7 @@ function openData() {
     title: 'all data',
     body,
     wide: true,
-    footer: el('button', { class: 'btn btn--lime', type: 'button', text: 'close', onclick: closeModal }),
+    footer: el('button', { class: 'btn btn--accent', type: 'button', text: 'close', onclick: closeModal }),
   });
 }
 
@@ -588,6 +601,7 @@ document.addEventListener('keydown', (event) => {
   const modalOpen = !$('#modalHost').hidden;
   if (event.key !== 'Escape') return;
   if (modalOpen) { closeModal(); return; }
+  if (drawerOpen()) { setDrawer(false); return; }
   if (state.screen === 'desk' || state.screen === 'newgame') goMenu();
 });
 
@@ -606,6 +620,19 @@ function boot() {
   });
 
   document.querySelectorAll('[data-action="menu"]').forEach((b) => b.addEventListener('click', goMenu));
+
+  $('#sideMore').addEventListener('click', (event) => {
+    event.stopPropagation();
+    setDrawer(!drawerOpen());
+  });
+  $('#drawerClose').addEventListener('click', () => setDrawer(false));
+  document.addEventListener('click', (event) => {
+    if (!drawerOpen()) return;
+    if (event.target.closest('#drawer') || event.target.closest('#sideMore')) return;
+    setDrawer(false);
+  });
+  $('#drawerNav').addEventListener('click', () => setDrawer(false));
+  renderDrawer();
   document.querySelectorAll('[data-action="settings"]').forEach((b) => b.addEventListener('click', openSettings));
   document.querySelectorAll('[data-action="data"]').forEach((b) => b.addEventListener('click', openData));
   document.querySelectorAll('.time button').forEach((b) => b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))));

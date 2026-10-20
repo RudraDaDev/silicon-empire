@@ -366,7 +366,8 @@ The main screen is not a dashboard of panels; it's a **personal device** running
 
 **Sidebar (84px, full height, fixed).** Device taskbar, vertical.
 - Top: a small "home" glyph — returns here from any sub-screen.
-- Middle: seven nav icons (design, lab, fab, market, finance, news, company), icon-only at 24px with a 9px mono label under each. Active item inverts to cream block, matching the tab rule.
+- Middle: **four** nav icons — design, lab, fab, marketing — at 24px with a 10px label under each, then a **double-arrow** button. Active item fills with the accent.
+- The double arrow opens a **sections drawer** (252px) that slides out from under the rail: market, browser, employee, contracts, pip, finance, news, company. Closed it sits a full width to the left of its open position, hidden behind the rail; opening translates it right in, closing translates it back, 260ms, same easing both ways. Escape and any click outside close it, and picking a section closes it.
 - Bottom: **game clock** — `1990 · W41` as a mono readout, with a tiny drawn calendar glyph; and **battery**. Battery is the device metaphor doing real work: it shows **cash runway** — full when solvent and long-lived, draining red below 12 months. Legible in a glance, no numbers needed.
 - Also bottom: play/pause + speed (`1× 4× 16×`) since the sim is weekly.
 

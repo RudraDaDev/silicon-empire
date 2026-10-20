@@ -54,8 +54,8 @@
   box-shadow: var(--shadow-xs);
 }
 .hud__card--cash {
-  background: var(--lime);
-  color: var(--lime-ink);
+  background: var(--accent);
+  color: var(--accent-ink);
   box-shadow: var(--shadow-sm);
 }
 
@@ -79,8 +79,8 @@
 .hud__card:not(.hud__card--cash) .hud__value { font-size: 17px; }
 
 .hud__delta { font-size: 10px; font-weight: 900; font-variant-numeric: tabular-nums; }
-.hud__card--cash .hud__delta.up { color: #1E4A05; }
-.hud__card--cash .hud__delta.down { color: #6E1505; }
+.hud__card--cash .hud__delta.up { color: var(--accent-ink); }
+.hud__card--cash .hud__delta.down { color: #4A1004; }
 .hud__card:not(.hud__card--cash) .hud__delta.up { color: var(--pos); }
 .hud__card:not(.hud__card--cash) .hud__delta.down { color: var(--neg); }
 
@@ -110,9 +110,9 @@
 }
 .time button:hover { color: var(--ink); background: var(--panel-3); }
 .time button[aria-pressed="true"] {
-  background: var(--lime);
+  background: var(--accent);
   border-color: var(--ink);
-  color: var(--lime-ink);
+  color: var(--accent-ink);
 }
 .time .i { width: 15px; height: 15px; }
 
@@ -296,11 +296,11 @@
 }
 .news-card__delta { font-size: 10px; font-weight: 900; text-transform: lowercase; }
 
-.news-card[data-kind="market"] { border-left: 7px solid var(--sky); }
-.news-card[data-kind="launch"] { border-left: 7px solid var(--lime); }
+.news-card[data-kind="market"] { border-left: 7px solid var(--violet); }
+.news-card[data-kind="launch"] { border-left: 7px solid var(--accent); }
 .news-card[data-kind="scandal"] { border-left: 7px solid var(--coral); }
-.news-card[data-kind="supply"] { border-left: 7px solid var(--violet); }
-.news-card[data-kind="presentation"] { border-left: 7px solid var(--lemon); }
+.news-card[data-kind="supply"] { border-left: 7px solid var(--lemon); }
+.news-card[data-kind="presentation"] { border-left: 7px solid var(--rose); }
 
 /* ── geometric fill: size guard ────────────────────────────
    The stage only gets its blueprint when the desk is in two columns and tall

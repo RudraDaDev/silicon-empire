@@ -26,9 +26,9 @@ export function fmtMoney(n) {
 /* ── demo world ───────────────────────────────────────────── */
 
 const PRODUCTS = [
-  { id: 'isx486', name: 'isx-486', colour: '#C9F74E', rate: 210_000 },
-  { id: 'isx386', name: 'isx-386', colour: '#7FD4FF', rate: 96_000 },
-  { id: 'm-256', name: 'm-256', colour: '#B69BFF', rate: 54_000 },
+  { id: 'isx486', name: 'isx-486', colour: 'var(--series-1)', rate: 210_000 },
+  { id: 'isx386', name: 'isx-386', colour: 'var(--series-2)', rate: 96_000 },
+  { id: 'm-256', name: 'm-256', colour: 'var(--series-3)', rate: 54_000 },
 ];
 
 export function makeDemoState(save) {
@@ -99,28 +99,7 @@ export function mountDesk({ save, onMenu, onNavigate }) {
     newsCount: $('#newsCount'),
   };
 
-  /* nav */
-  const NAV = [
-    ['design', 'ruler', 'design'], ['lab', 'beaker', 'lab'], ['fab', 'wafer', 'fab'],
-    ['market', 'scale', 'market'], ['finance', 'ledger', 'finance'],
-    ['news', 'news', 'news'], ['company', 'company', 'firm'],
-  ];
-  const nav = $('#sideNav');
-  nav.replaceChildren();
-  NAV.forEach(([id, icon, label]) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'nav-item';
-    button.dataset.nav = id;
-    button.innerHTML = `<svg class="i i--24" aria-hidden="true"><use href="#i-${icon}"/></svg>
-      <span class="nav-item__label">${label}</span>`;
-    button.addEventListener('click', () => {
-      [...nav.children].forEach((b) => b.removeAttribute('aria-current'));
-      button.setAttribute('aria-current', 'page');
-      onNavigate?.(id);
-    });
-    nav.append(button);
-  });
+  /* the rail is owned by the shell (src/ui/sections.js), not by the desk */
 
   document.querySelectorAll('[data-action="menu"]').forEach((b) => b.addEventListener('click', onMenu));
 
@@ -205,10 +184,10 @@ export function mountDesk({ save, onMenu, onNavigate }) {
         `L${points[points.length - 1][0].toFixed(1)} ${(padT + plotH).toFixed(1)}`,
         'Z',
       ].join(' ');
-      svg += `<path d="${area}" fill="${product.colour}" opacity=".16"/>`;
+      svg += `<path d="${area}" style="fill:${product.colour};opacity:.16"/>`;
 
       const line = points.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(1)} ${py.toFixed(1)}`).join(' ');
-      svg += `<path d="${line}" fill="none" stroke="${product.colour}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+      svg += `<path d="${line}" style="fill:none;stroke:${product.colour};stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round"/>`;
     });
 
     refs.chart.innerHTML = svg;
@@ -297,7 +276,7 @@ export function mountDesk({ save, onMenu, onNavigate }) {
     },
 
     destroy() {
-      $('#sideNav')?.replaceChildren();
+      $('#newsGrid')?.replaceChildren();
     },
   };
 }
