@@ -1,122 +1,71 @@
-/* ── reset + base ─────────────────────────────────────────── */
+/* reset + base type */
 
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
+*, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
 
 body {
   margin: 0;
-  background: var(--paper-0);
-  color: var(--ink-0);
-  font-family: var(--serif);
-  font-size: 16px;
-  line-height: 1.55;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  overflow: hidden; /* the desk is a device, not a page */
+  overflow: hidden;
 }
 
-h1, h2, h3, p, figure { margin: 0; }
+h1, h2, h3, p, figure, dl, dd { margin: 0; }
 
-button, input, select {
-  font: inherit;
-  color: inherit;
-}
+button, input, select { font: inherit; color: inherit; }
 
-/* ── type utilities ───────────────────────────────────────── */
-
+/* everything reads lowercase, like the reference */
 .lbl {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-transform: lowercase;
+  color: var(--muted);
 }
 
-.lbl--ink { color: var(--ink-1); }
-
-.wordmark-spaced {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: .34em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  white-space: nowrap;
+.wordmark {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .22em;
+  text-transform: lowercase;
+  color: var(--faint);
 }
 
-.footnote {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
-.mono {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── focus ────────────────────────────────────────────────── */
+.num { font-variant-numeric: tabular-nums; }
 
 :focus-visible {
-  outline: 2px solid var(--yellow);
+  outline: 3px solid var(--sky);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
-
-/* ── motion ───────────────────────────────────────────────── */
-
-html[data-motion="off"] *,
-html[data-motion="off"] *::before,
-html[data-motion="off"] *::after {
-  animation: none !important;
-  transition: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-  }
-}
-
-/* ── icon defaults ────────────────────────────────────────── */
 
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 .i {
-  width: 20px;
-  height: 20px;
-  flex: none;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.6;
+  width: 20px; height: 20px; flex: none;
+  stroke: currentColor; fill: none;
+  stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
-  overflow: visible;
 }
-
 .i--16 { width: 16px; height: 16px; }
 .i--24 { width: 24px; height: 24px; }
+.i--28 { width: 28px; height: 28px; }
 
-/* ── screens ──────────────────────────────────────────────── */
-
-.screen {
-  position: fixed;
-  inset: 0;
-  display: none;
+/* motion */
+html[data-motion="off"] *, html[data-motion="off"] *::before, html[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
-body[data-screen="newgame"] .screen--login,
-body[data-screen="menu"] .screen--menu,
-body[data-screen="desk"] .screen--desk {
-  display: grid;
-}
-
-/* text scale — stopgap until token-driven rem scale */
-body[data-scale="lg"] { zoom: 1.12; }
-body[data-scale="xl"] { zoom: 1.24; }
+body[data-scale="lg"] { zoom: 1.1; }
+body[data-scale="xl"] { zoom: 1.2; }

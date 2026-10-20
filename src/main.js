@@ -1,24 +1,18 @@
 /**
- * Silicon Empire — boot, menu, new game, desk.
- *
- * Screens: menu → newgame → desk. A loadable save goes straight to the desk.
- * The simulation is not wired yet; desk.js runs on a placeholder state and
- * says so. See PLAN.md §3 for the contract it will satisfy.
+ * Silicon Empire — shell, menu, new game, desk.
+ * One persistent sidebar; views swap inside it.
  */
 
 import {
   listProfiles, getProfile, createProfile, renameCompany, touchProfile,
   getActiveProfileId, clearActiveProfile,
-  listSaves, latestSave, createSave, deleteSave,
+  listSaves, latestSave, createSave, deleteSave, deleteProfile,
   getSettings, saveSettings, exportAll, importAll, dataSummary, clearEverything,
-  deleteProfile, initials, timeAgo, bytesLabel,
+  initials, timeAgo, bytesLabel,
 } from './app/store.js';
 import { mountDesk } from './ui/desk.js';
 
-/* ── DOM helpers ──────────────────────────────────────────── */
-
 const $ = (sel, root = document) => root.querySelector(sel);
-
 const el = (tag, props = {}, ...children) => {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
@@ -34,9 +28,7 @@ const el = (tag, props = {}, ...children) => {
   }
   return node;
 };
-
-const icon = (name, size = '') =>
-  `<svg class="i${size ? ` i--${size}` : ''}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const icon = (name, size = '') => `<svg class="i${size ? ` i--${size}` : ''}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 
 /* ── state ────────────────────────────────────────────────── */
 
@@ -44,14 +36,12 @@ const state = {
   screen: 'menu',
   profile: null,
   save: null,
-  selectedIndex: 0,
-  actions: [],
   speed: 0,
   timer: null,
   desk: null,
 };
 
-const SPEED_MS = { 1: 1100, 4: 420, 16: 150 };
+const SPEED_MS = { 1: 1200, 4: 480, 16: 190 };
 
 /* ── settings ─────────────────────────────────────────────── */
 
@@ -65,7 +55,7 @@ function applySettings() {
 /* ── toast ────────────────────────────────────────────────── */
 
 let toastTimer = null;
-function toast(message, { warn = false, ms = 3400 } = {}) {
+function toast(message, { warn = false, ms = 3200 } = {}) {
   const host = $('#toastHost');
   host.replaceChildren();
   const node = el('div', { class: `toast${warn ? ' toast--warn' : ''}`, role: 'status' });
@@ -76,163 +66,142 @@ function toast(message, { warn = false, ms = 3400 } = {}) {
   toastTimer = setTimeout(() => host.replaceChildren(), ms);
 }
 
-/* ── screens ──────────────────────────────────────────────── */
+/* ── routing ──────────────────────────────────────────────── */
 
 function go(screen) {
   state.screen = screen;
   document.body.dataset.screen = screen;
+  renderSidebar();
 
   if (screen === 'menu') renderMenu();
   if (screen === 'newgame') prepareNewGame();
   if (screen === 'desk') startDesk();
 }
 
-/* ═════════════════════════ MAIN MENU ═══════════════════════ */
+/* ── sidebar (all screens) ────────────────────────────────── */
+
+const NAV = [
+  ['design', 'ruler', 'design'], ['lab', 'beaker', 'lab'], ['fab', 'wafer', 'fab'],
+  ['market', 'scale', 'market'], ['finance', 'ledger', 'finance'],
+  ['news', 'news', 'news'], ['company', 'company', 'firm'],
+];
+
+function renderSidebar() {
+  const nav = $('#sideNav');
+  const inGame = state.screen === 'desk';
+
+  nav.replaceChildren(...NAV.map(([id, iconName, label]) => {
+    const button = el('button', {
+      class: 'nav-item',
+      type: 'button',
+      disabled: !inGame,
+      title: label,
+      html: `${icon(iconName, '24')}<span class="nav-item__label">${label}</span>`,
+      onclick: () => {
+        [...nav.children].forEach((b) => b.removeAttribute('aria-current'));
+        button.setAttribute('aria-current', 'page');
+        toast(`${label} screen is not built yet.`, { warn: true });
+      },
+    });
+    return button;
+  }));
+
+  // date + battery reflect the live save when one is open
+  const snap = state.desk?.getState();
+  $('#clockYear').textContent = String(snap?.year ?? 1990);
+  $('#clockDate').textContent = 'jan 1';
+  $('#batteryFill').style.width = '60%';
+  $('#batteryLabel').textContent = 'no campaign';
+}
+
+/* ═════════════════════════ menu ═══════════════════════════ */
 
 const MENU = [
-  { id: 'continue', icon: 'play', label: 'Continue', desc: 'Resume the latest campaign', hint: 'ENTER', needsSave: true },
-  { id: 'new', icon: 'plus', label: 'New game', desc: 'Found a company in 1990', hint: 'N' },
-  { id: 'saves', icon: 'disk', label: 'Saves', desc: 'Slots in this profile', hint: 'L' },
-  { sep: true },
-  { id: 'settings', icon: 'gear', label: 'Settings', desc: 'Theme, text size, motion', hint: 'S' },
-  { id: 'credits', icon: 'book', label: 'Credits', desc: 'Who built this', hint: 'C' },
-  { id: 'data', icon: 'data', label: 'All data', desc: 'Profiles, saves, export', hint: 'D' },
-  { sep: true },
-  { id: 'switch', icon: 'exit', label: 'Switch profile', desc: 'Back to profile select', hint: 'ESC' },
+  { id: 'continue', icon: 'play', label: 'continue', desc: 'resume the latest campaign', needsSave: true, primary: true },
+  { id: 'new', icon: 'plus', label: 'new game', desc: 'found a company in 1990' },
+  { id: 'saves', icon: 'disk', label: 'saves', desc: 'slots in this profile' },
+  { id: 'settings', icon: 'gear', label: 'settings', desc: 'theme, text size, motion' },
+  { id: 'credits', icon: 'book', label: 'credits', desc: 'who built this' },
+  { id: 'data', icon: 'data', label: 'all data', desc: 'profiles, saves, export' },
+  { id: 'switch', icon: 'exit', label: 'switch profile', desc: 'back to profile select', danger: true },
 ];
 
 function renderMenu() {
   const profile = state.profile ?? getProfile(getActiveProfileId());
+  if (profile) state.profile = profile;
 
-  if (!profile) {
-    // No profile yet: show the menu anyway, with placeholder identity.
-    $('#menuCompany').textContent = 'No profile';
-    $('#menuFounded').innerHTML = 'Create a company to begin';
-    $('#profilePill').textContent = '—';
-  } else {
-    state.profile = profile;
-    const saves = listSaves(profile.id);
-    const save = latestSave(profile.id);
+  const save = profile ? latestSave(profile.id) : null;
+  const saves = profile ? listSaves(profile.id) : [];
 
-    $('#menuCompany').textContent = save?.company ?? profile.company;
-    $('#menuFounded').innerHTML = `founded <b>${profile.founded ?? 1990}</b> · by <b>${escapeHtml(profile.name)}</b>`;
-    $('#profilePill').textContent = initials(profile.name);
-    $('#menuStatus').textContent = save
-      ? `${saves.length} save${saves.length === 1 ? '' : 's'} · week ${save.week}`
-      : 'No save in this profile';
-    $('#menuWeekPill').textContent = save ? `Week ${save.week} · ${save.year}` : 'Week 1 · 1990';
-    $('#menuCashPill').textContent = save ? fmtMoney(save.cash) : '$4.2M seed';
-  }
+  $('#menuCompany').textContent = save?.company ?? profile?.company ?? 'no company yet';
+  $('#menuMeta').textContent = profile
+    ? `founded 1990 · by ${profile.name}`
+    : 'start a new game to found one';
+  $('#menuProfile').textContent = profile ? initials(profile.name) : '—';
+  $('#menuStatus').textContent = save
+    ? `${saves.length} save${saves.length === 1 ? '' : 's'} · week ${save.week}`
+    : 'no save';
 
-  const hasSave = Boolean(state.profile && latestSave(state.profile.id));
-  const list = $('#menuList');
-  list.replaceChildren();
-  state.actions = [];
-
-  MENU.forEach((item) => {
-    if (item.sep) {
-      list.append(el('div', { class: 'menu-sep', 'aria-hidden': 'true' }));
-      return;
-    }
-
-    const disabled = item.needsSave && !hasSave;
-    const index = state.actions.length;
-    state.actions.push(item);
-
+  const grid = $('#menuGrid');
+  grid.replaceChildren(...MENU.map((item) => {
+    const disabled = item.needsSave && !save;
     const button = el('button', {
-      class: 'menu-item',
+      class: `menu-btn${item.primary ? ' menu-btn--primary' : ''}${item.danger ? ' menu-btn--danger' : ''}`,
       type: 'button',
-      role: 'menuitem',
-      'data-index': index,
-      'aria-disabled': disabled ? 'true' : null,
+      'data-disabled': disabled ? 'true' : 'false',
       onclick: () => (disabled
-        ? toast('No save yet — start a new game.', { warn: true })
+        ? toast('no save yet — start a new game', { warn: true })
         : runMenu(item.id)),
-      onmouseenter: () => setSelected(index),
     });
-
     button.innerHTML = `
-      <span class="menu-item__icon">${icon(item.icon)}</span>
-      <span class="menu-item__body">
-        <span class="menu-item__label"></span>
-        <span class="menu-item__desc"></span>
-      </span>
-      <span class="menu-item__hint"></span>`;
-    button.querySelector('.menu-item__label').textContent = item.label;
-    button.querySelector('.menu-item__desc').textContent = disabled ? 'No save yet' : item.desc;
-    button.querySelector('.menu-item__hint').textContent = item.hint;
-    if (disabled) button.style.opacity = '.55';
-
-    list.append(button);
-  });
-
-  setSelected(0);
-}
-
-function setSelected(index) {
-  const items = [...document.querySelectorAll('.menu-item')];
-  if (!items.length) return;
-  const clamped = Math.max(0, Math.min(index, items.length - 1));
-  state.selectedIndex = clamped;
-  items.forEach((node, i) => { node.dataset.selected = String(i === clamped); });
+      <span class="menu-btn__icon">${icon(item.icon)}</span>
+      <span class="menu-btn__body">
+        <span class="menu-btn__label"></span>
+        <span class="menu-btn__desc"></span>
+      </span>`;
+    button.querySelector('.menu-btn__label').textContent = item.label;
+    button.querySelector('.menu-btn__desc').textContent = disabled ? 'no save yet' : item.desc;
+    return button;
+  }));
 }
 
 function runMenu(id) {
   switch (id) {
     case 'continue': {
       const save = state.profile && latestSave(state.profile.id);
-      if (!save) return toast('No save yet — start a new game.', { warn: true });
+      if (!save) return toast('no save yet — start a new game', { warn: true });
       state.save = save;
-      go('desk');
-      break;
+      return go('desk');
     }
-    case 'new':
-      go('newgame');
-      break;
-    case 'saves':
-      openSaves();
-      break;
-    case 'settings':
-      openSettings();
-      break;
-    case 'credits':
-      openCredits();
-      break;
-    case 'data':
-      openData();
-      break;
+    case 'new': return go('newgame');
+    case 'saves': return openSaves();
+    case 'settings': return openSettings();
+    case 'credits': return openCredits();
+    case 'data': return openData();
     case 'switch':
-      switchProfile();
-      break;
-    default:
-      break;
+      clearActiveProfile();
+      state.profile = null;
+      state.save = null;
+      closeModal();
+      return go('newgame');
+    default: return undefined;
   }
 }
 
-function switchProfile() {
-  clearActiveProfile();
-  state.profile = null;
-  state.save = null;
-  closeModal();
-  go('newgame');
-}
-
-/* ═════════════════════════ NEW GAME ═════════════════════════ */
+/* ═════════════════════════ new game ═══════════════════════ */
 
 function prepareNewGame() {
-  const nameInput = $('#founderName');
-  nameInput.value = state.profile?.name ?? '';
+  const founder = $('#founderName');
+  founder.value = state.profile?.name ?? '';
   $('#companyName').value = state.profile?.company ?? '';
-  $('#nameHint').classList.remove('field-hint--error');
-  $('#nameHint').textContent = 'Printed as “by …” on your company plate.';
-  $('#founderName').classList.remove('field--invalid');
+  const hint = $('#nameHint');
+  hint.classList.remove('field-hint--error');
+  hint.textContent = 'prints as “by …” on your company plate';
+  founder.classList.remove('field--invalid');
 
   renderProfileList();
-
-  // With no name typed yet, let the founder field take focus.
   requestAnimationFrame(() => {
-    if (!nameInput.value) nameInput.focus();
-    else $('#companyName').focus();
+    (founder.value ? $('#companyName') : founder).focus();
   });
 }
 
@@ -250,120 +219,102 @@ function renderProfileList() {
   wrap.hidden = false;
   $('#profileCount').textContent = `${profiles.length} on this device`;
 
-  list.replaceChildren(
-    ...profiles.map((p) => {
-      const saves = listSaves(p.id);
-      return el('button', {
-        class: 'profile',
-        type: 'button',
-        role: 'listitem',
-        onclick: () => {
-          state.profile = p;
-          touchProfile(p.id);
-          renderMenu();
-          go('menu');
-        },
+  list.replaceChildren(...profiles.map((p) => {
+    const saves = listSaves(p.id);
+    const row = el('button', {
+      class: 'profile',
+      type: 'button',
+      onclick: () => {
+        state.profile = p;
+        touchProfile(p.id);
+        go('menu');
       },
-        el('span', { class: 'profile__avatar', 'aria-hidden': 'true', text: initials(p.name) }),
-        el('span', { class: 'profile__body' },
-          el('span', { class: 'profile__name', text: p.name }),
-          el('span', {
-            class: 'profile__meta',
-            text: saves.length
-              ? `${saves.length} save${saves.length === 1 ? '' : 's'} · ${timeAgo(p.lastPlayed)}`
-              : `no save · ${timeAgo(p.lastPlayed)}`,
-          }),
-        ),
-        el('span', { class: 'profile__go', html: icon('arrow', '16') }),
-      );
-    }),
-  );
+    });
+    row.innerHTML = `
+      <span class="profile__avatar">${initials(p.name)}</span>
+      <span class="profile__body">
+        <span class="profile__name"></span>
+        <span class="profile__meta"></span>
+      </span>
+      ${icon('arrow', '16')}`;
+    row.querySelector('.profile__name').textContent = p.name;
+    row.querySelector('.profile__meta').textContent = saves.length
+      ? `${saves.length} save${saves.length === 1 ? '' : 's'} · ${timeAgo(p.lastPlayed)}`
+      : `no save · ${timeAgo(p.lastPlayed)}`;
+    return row;
+  }));
 }
 
 function handleNewGame(event) {
   event.preventDefault();
-
   const founderInput = $('#founderName');
   const companyInput = $('#companyName');
   const hint = $('#nameHint');
   const founder = founderInput.value.trim();
-  const company = companyInput.value.trim() || 'Untitled Company';
+  const company = companyInput.value.trim() || 'untitled company';
 
   if (!founder) {
     founderInput.classList.add('field--invalid');
     hint.classList.add('field-hint--error');
-    hint.textContent = 'Enter a founder name — it prints on your company plate.';
+    hint.textContent = 'enter a founder name';
     founderInput.focus();
     return;
   }
 
   founderInput.classList.remove('field--invalid');
   hint.classList.remove('field-hint--error');
+  hint.textContent = 'prints as “by …” on your company plate';
 
   const result = createProfile(founder, company);
   if (!result.ok) {
     hint.classList.add('field-hint--error');
     hint.textContent = result.error === 'storage'
-      ? 'Could not save: browser storage is full or blocked.'
-      : 'That name cannot be used.';
+      ? 'could not save — storage is full or blocked'
+      : 'that name cannot be used';
     return;
   }
 
   const profile = result.profile;
   if (!result.reused) renameCompany(profile.id, company);
-
   state.profile = profile;
   touchProfile(profile.id);
 
-  const seedValue = Number($('#seedInput').value) || 1990;
-  const created = createSave(profile.id, { company, founder, seed: seedValue });
-  if (!created.ok) {
-    toast('Could not write the save — storage is full.', { warn: true });
-    return;
-  }
+  const seed = Number($('#seedInput').value) || 1990;
+  const created = createSave(profile.id, { company, founder, seed });
+  if (!created.ok) return toast('could not write the save', { warn: true });
 
   state.save = created.save;
   go('desk');
 }
 
-/* ═════════════════════════ THE DESK ═════════════════════════ */
+/* ═════════════════════════ desk ═══════════════════════════ */
 
 function startDesk() {
   const save = state.save ?? (state.profile && latestSave(state.profile.id));
   if (!save) {
-    toast('No save to open.', { warn: true });
-    go('menu');
-    return;
+    toast('no save to open', { warn: true });
+    return go('menu');
   }
-
   state.save = save;
-  document.querySelectorAll('.nav-item').forEach((b) => b.removeAttribute('aria-current'));
 
   state.desk = mountDesk({
     save,
     onMenu: () => { stopClock(); go('menu'); },
-    onNavigate: (id) => toast(`${labelFor(id)} screen is not built yet.`, { warn: true }),
-    onSpeed: (speed) => setSpeed(speed),
+    onNavigate: () => {},
   });
 
   setSpeed(1);
-}
-
-function labelFor(id) {
-  return { design: 'Designer', lab: 'Lab', fab: 'Fab', market: 'Market', finance: 'Finance', news: 'News', company: 'Company' }[id] ?? id;
+  return undefined;
 }
 
 function setSpeed(speed) {
   state.speed = speed;
   stopClock();
-  if (speed > 0) {
-    state.timer = setInterval(() => {
-      state.desk?.tick();
-      const snap = state.desk?.getState();
-      if (snap) {
-        state.save = { ...state.save, week: snap.week, year: snap.year, cash: snap.cash, rp: snap.rp };
-      }
-    }, SPEED_MS[speed] ?? 1100);
+  document.querySelectorAll('.time button').forEach((b) => {
+    b.setAttribute('aria-pressed', String(Number(b.dataset.speed) === speed));
+  });
+  if (speed > 0 && state.desk) {
+    state.timer = setInterval(() => state.desk?.tick(), SPEED_MS[speed] ?? 1200);
   }
 }
 
@@ -372,30 +323,25 @@ function stopClock() {
   state.timer = null;
 }
 
-/* ── modal ────────────────────────────────────────────────── */
+/* ── modal helpers ────────────────────────────────────────── */
 
 function openModal({ title, body, footer, wide = false }) {
   const host = $('#modalHost');
   const panel = el('div', {
-    class: 'modal',
-    role: 'dialog',
-    'aria-modal': 'true',
-    'aria-label': title,
+    class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title,
     style: wide ? 'width:min(620px,100%)' : null,
   });
-
   panel.append(
     el('div', { class: 'modal__head' },
       el('h2', { class: 'modal__title', text: title }),
       el('button', {
-        class: 'icon-btn', type: 'button', title: 'Close', 'aria-label': 'Close',
+        class: 'icon-btn', type: 'button', title: 'close', 'aria-label': 'close',
         html: icon('exit'), onclick: closeModal,
       }),
     ),
     el('div', { class: 'modal__body' }, body),
   );
   if (footer) panel.append(el('div', { class: 'modal__foot' }, footer));
-
   host.replaceChildren(panel);
   host.hidden = false;
   host.onclick = (e) => { if (e.target === host) closeModal(); };
@@ -433,37 +379,33 @@ function openSaves() {
   const saves = profile ? listSaves(profile.id) : [];
 
   const body = saves.length
-    ? el('div', { class: 'slot-list' },
-      ...saves.map((s) => el('div', { class: 'slot' },
-        el('div', { class: 'slot__body' },
-          el('div', { class: 'slot__name', text: s.company }),
-          el('div', {
-            class: 'slot__meta',
-            text: `week ${s.week} · ${s.year} · ${fmtMoney(s.cash)} · ${timeAgo(s.updatedAt)}`,
-          }),
-        ),
-        el('div', { class: 'slot__actions' },
-          el('button', {
-            class: 'btn btn--ghost', type: 'button', text: 'Load',
-            onclick: () => { state.save = s; closeModal(); go('desk'); },
-          }),
-          el('button', {
-            class: 'icon-btn', type: 'button', title: 'Delete save', 'aria-label': 'Delete save',
-            html: icon('exit', '16'),
-            onclick: () => { deleteSave(profile.id, s.id); openSaves(); toast('Save deleted.'); },
-          }),
-        ),
-      )))
+    ? el('div', { class: 'slot-list' }, ...saves.map((s) => el('div', { class: 'slot' },
+      el('div', { class: 'slot__body' },
+        el('div', { class: 'slot__name', text: s.company }),
+        el('div', { class: 'slot__meta', text: `week ${s.week} · ${s.year} · ${fmtMoney(s.cash)} · ${timeAgo(s.updatedAt)}` }),
+      ),
+      el('div', { class: 'slot__actions' },
+        el('button', {
+          class: 'btn btn--lime btn--sm', type: 'button', text: 'load',
+          onclick: () => { state.save = s; closeModal(); go('desk'); },
+        }),
+        el('button', {
+          class: 'icon-btn', type: 'button', title: 'delete save', 'aria-label': 'delete save',
+          html: icon('exit', '16'),
+          onclick: () => { deleteSave(profile.id, s.id); openSaves(); toast('save deleted'); },
+        }),
+      ),
+    )))
     : el('div', { class: 'empty' },
-      el('p', { class: 'empty__title', text: 'No saves yet' }),
-      el('p', { class: 'empty__body', text: 'Found a company to create your first campaign.' }),
+      el('p', { class: 'empty__title', text: 'no saves yet' }),
+      el('p', { class: 'empty__body', text: 'found a company to create your first campaign' }),
     );
 
   openModal({
-    title: 'Saves',
+    title: 'saves',
     body,
     footer: el('button', {
-      class: 'btn btn--solid', type: 'button', text: 'New game',
+      class: 'btn btn--lime', type: 'button', text: 'new game',
       onclick: () => { closeModal(); go('newgame'); },
     }),
   });
@@ -473,160 +415,132 @@ function openSaves() {
 
 function openSettings() {
   const s = getSettings();
-  const update = (patch) => {
-    saveSettings({ ...getSettings(), ...patch });
-    applySettings();
-  };
+  const update = (patch) => { saveSettings({ ...getSettings(), ...patch }); applySettings(); };
 
   const body = el('div', {},
     el('div', { class: 'setting' },
       el('div', {},
-        el('div', { class: 'setting__label', text: 'Theme' }),
-        el('div', { class: 'setting__desc', text: 'Warm dark is the default. Light keeps parity.' }),
+        el('div', { class: 'setting__label', text: 'theme' }),
+        el('div', { class: 'setting__desc', text: 'dark by default; light matches the reference' }),
       ),
-      segment([{ value: 'dark', label: 'Dark' }, { value: 'light', label: 'Light' }], s.theme, (v) => update({ theme: v })),
+      segment([{ value: 'dark', label: 'dark' }, { value: 'light', label: 'light' }], s.theme, (v) => update({ theme: v })),
     ),
     el('div', { class: 'setting' },
       el('div', {},
-        el('div', { class: 'setting__label', text: 'Text size' }),
-        el('div', { class: 'setting__desc', text: 'Scales the whole interface.' }),
+        el('div', { class: 'setting__label', text: 'text size' }),
+        el('div', { class: 'setting__desc', text: 'scales the whole interface' }),
       ),
       segment([
-        { value: 'md', label: 'Normal' }, { value: 'lg', label: 'Large' }, { value: 'xl', label: 'X-Large' },
+        { value: 'md', label: 'normal' }, { value: 'lg', label: 'large' }, { value: 'xl', label: 'XL' },
       ], s.scale, (v) => update({ scale: v })),
     ),
     el('div', { class: 'setting' },
       el('div', {},
-        el('div', { class: 'setting__label', text: 'Motion' }),
-        el('div', { class: 'setting__desc', text: 'Turn off animations and the wafer pulse.' }),
+        el('div', { class: 'setting__label', text: 'motion' }),
+        el('div', { class: 'setting__desc', text: 'turns off animation' }),
       ),
-      segment([{ value: 'on', label: 'On' }, { value: 'off', label: 'Off' }], s.motion, (v) => update({ motion: v })),
+      segment([{ value: 'on', label: 'on' }, { value: 'off', label: 'off' }], s.motion, (v) => update({ motion: v })),
     ),
   );
 
   openModal({
-    title: 'Settings',
+    title: 'settings',
     body,
-    footer: el('button', { class: 'btn btn--solid', type: 'button', text: 'Done', onclick: closeModal }),
+    footer: el('button', { class: 'btn btn--lime', type: 'button', text: 'done', onclick: closeModal }),
   });
 }
 
 /* ── credits ──────────────────────────────────────────────── */
 
 function openCredits() {
+  const credit = (term, text) => el('dl', { class: 'credit' }, el('dt', { text: term }), el('dd', { text }));
   const body = el('div', { class: 'credits-list' },
-    credit('Game', 'Silicon Empire — a 1990–2026 semiconductor tycoon.'),
-    credit('Design', 'Warm editorial dark, serif + mono, blueprint surfaces for technical screens.'),
-    credit('Icons', 'Hand-drawn SVG on a 24 px grid. No emoji, no icon fonts.'),
-    credit('Status', 'Build 0.1 — menu, new game, desk shell. Simulation not yet wired.'),
+    credit('game', 'silicon empire — a 1990–2026 semiconductor tycoon'),
+    credit('look', 'chunky borders, bold lowercase, lime accent, hand-drawn icons'),
+    credit('status', 'build 0.2 — menu, new game, desk shell. simulation not wired yet'),
   );
-
   openModal({
-    title: 'Credits',
+    title: 'credits',
     body,
-    footer: el('button', { class: 'btn btn--solid', type: 'button', text: 'Close', onclick: closeModal }),
+    footer: el('button', { class: 'btn btn--lime', type: 'button', text: 'close', onclick: closeModal }),
   });
-}
-
-function credit(term, text) {
-  return el('dl', { class: 'credit' },
-    el('dt', { text: term }),
-    el('dd', { text }),
-  );
 }
 
 /* ── all data ─────────────────────────────────────────────── */
 
 function openData() {
   const summary = dataSummary();
+  const stat = (label, value) => el('div', { class: 'data-stat' },
+    el('span', { class: 'lbl', text: label }),
+    el('span', { class: 'data-stat__value', text: value }),
+  );
 
   const body = el('div', {},
     el('div', { class: 'data-grid' },
-      stat('Profiles', String(summary.profiles)),
-      stat('Saves', String(summary.saves)),
-      stat('Storage', bytesLabel(summary.bytes)),
+      stat('profiles', String(summary.profiles)),
+      stat('saves', String(summary.saves)),
+      stat('storage', bytesLabel(summary.bytes)),
     ),
-
     el('div', { class: 'setting' },
       el('div', {},
-        el('div', { class: 'setting__label', text: 'Export everything' }),
-        el('div', { class: 'setting__desc', text: 'Profiles, saves and settings as one JSON file.' }),
+        el('div', { class: 'setting__label', text: 'export everything' }),
+        el('div', { class: 'setting__desc', text: 'profiles, saves and settings as one json file' }),
       ),
-      el('button', { class: 'btn btn--ghost', type: 'button', text: 'Export', onclick: downloadExport }),
+      el('button', { class: 'btn btn--sm', type: 'button', text: 'export', onclick: downloadExport }),
     ),
-
     el('div', { class: 'setting' },
       el('div', {},
-        el('div', { class: 'setting__label', text: 'Import' }),
-        el('div', { class: 'setting__desc', text: 'Replaces current profiles and saves.' }),
+        el('div', { class: 'setting__label', text: 'import' }),
+        el('div', { class: 'setting__desc', text: 'replaces current profiles and saves' }),
       ),
-      el('button', { class: 'btn btn--ghost', type: 'button', text: 'Choose file', onclick: pickImport }),
+      el('button', { class: 'btn btn--sm', type: 'button', text: 'choose file', onclick: pickImport }),
     ),
-
-    el('div', { class: 'setting' },
-      el('div', {},
-        el('div', { class: 'setting__label', text: 'Profiles on this device' }),
-        el('div', { class: 'setting__desc', text: 'Deleting a profile removes its saves.' }),
-      ),
-    ),
-
-    el('div', { class: 'slot-list' },
-      ...(listProfiles().length
-        ? listProfiles().map((p) => el('div', { class: 'slot' },
-          el('div', { class: 'slot__body' },
-            el('div', { class: 'slot__name', text: p.name }),
-            el('div', { class: 'slot__meta', text: `${p.company} · ${listSaves(p.id).length} save(s) · ${timeAgo(p.lastPlayed)}` }),
-          ),
-          el('button', {
-            class: 'icon-btn', type: 'button', title: 'Delete profile', 'aria-label': 'Delete profile',
-            html: icon('exit', '16'),
-            onclick: () => { deleteProfile(p.id); openData(); toast('Profile deleted.'); },
-          }),
-        ))
-        : [el('p', { class: 'empty__body', text: 'No profiles stored.' })]),
-    ),
-
+    el('div', { class: 'slot-list' }, ...(listProfiles().length
+      ? listProfiles().map((p) => el('div', { class: 'slot' },
+        el('div', { class: 'slot__body' },
+          el('div', { class: 'slot__name', text: p.name }),
+          el('div', { class: 'slot__meta', text: `${p.company} · ${listSaves(p.id).length} save(s)` }),
+        ),
+        el('button', {
+          class: 'icon-btn', type: 'button', title: 'delete profile', 'aria-label': 'delete profile',
+          html: icon('exit', '16'),
+          onclick: () => { deleteProfile(p.id); openData(); toast('profile deleted'); },
+        }),
+      ))
+      : [el('p', { class: 'empty__body', text: 'no profiles stored' })])),
     el('div', { class: 'danger-zone' },
       el('button', {
-        class: 'btn btn--red', type: 'button', text: 'Erase all data',
+        class: 'btn btn--coral btn--sm', type: 'button', text: 'erase all data',
         onclick: () => {
           clearEverything();
           state.profile = null;
           state.save = null;
           closeModal();
           go('menu');
-          toast('All local data erased.', { warn: true });
+          toast('all local data erased', { warn: true });
         },
       }),
-      el('span', { class: 'footnote', text: 'Cannot be undone. Export first.' }),
+      el('span', { class: 'lbl', text: 'cannot be undone' }),
     ),
   );
 
   openModal({
-    title: 'All data',
+    title: 'all data',
     body,
     wide: true,
-    footer: el('button', { class: 'btn btn--solid', type: 'button', text: 'Close', onclick: closeModal }),
+    footer: el('button', { class: 'btn btn--lime', type: 'button', text: 'close', onclick: closeModal }),
   });
 }
 
-function stat(label, value) {
-  return el('div', { class: 'data-stat' },
-    el('span', { class: 'lbl', text: label }),
-    el('span', { class: 'data-stat__value', text: value }),
-  );
-}
-
 function downloadExport() {
-  const payload = exportAll();
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(exportAll(), null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = el('a', { href: url, download: `silicon-empire-${new Date().toISOString().slice(0, 10)}.json` });
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-  toast('Export downloaded.');
+  toast('export downloaded');
 }
 
 function pickImport() {
@@ -641,108 +555,35 @@ function pickImport() {
       state.profile = getProfile(getActiveProfileId()) ?? null;
       closeModal();
       go('menu');
-      toast('Data imported.');
+      return toast('data imported');
     } catch {
-      toast('That file is not valid JSON.', { warn: true });
+      return toast('that file is not valid json', { warn: true });
     }
   });
   input.click();
 }
 
-/* ── formatting ───────────────────────────────────────────── */
-
 function fmtMoney(n) {
   const abs = Math.abs(n);
-  if (abs >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-  if (abs >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-  if (abs >= 1e3) return `$${(n / 1e3).toFixed(0)}k`;
-  return `$${n.toFixed(0)}`;
-}
-
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-  ));
+  if (abs >= 1e9) return `$${(n / 1e9).toFixed(2)}b`;
+  if (abs >= 1e6) return `$${(n / 1e6).toFixed(2)}m`;
+  if (abs >= 1e3) return `$${Math.round(n / 1e3)}k`;
+  return `$${Math.round(n)}`;
 }
 
 /* ── keyboard ─────────────────────────────────────────────── */
 
-function onKeyDown(event) {
+document.addEventListener('keydown', (event) => {
   const modalOpen = !$('#modalHost').hidden;
-  const typing = event.target instanceof Element
-    && event.target.closest('input, textarea, select');
-
-  if (event.key === 'Escape') {
-    if (modalOpen) return closeModal();
-    if (state.screen === 'desk') { stopClock(); go('menu'); return; }
-    if (state.screen === 'newgame') { go('menu'); return; }
-    return;
-  }
-
-  if (state.screen !== 'menu' || modalOpen || typing) return;
-
-  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-    event.preventDefault();
-    const delta = event.key === 'ArrowDown' ? 1 : -1;
-    const max = document.querySelectorAll('.menu-item').length - 1;
-    const next = Math.max(0, Math.min(state.selectedIndex + delta, max));
-    setSelected(next);
-    document.querySelector(`.menu-item[data-index="${next}"]`)?.focus();
-    return;
-  }
-
-  if (event.key === 'Enter') {
-    const focused = event.target instanceof Element && event.target.closest('.menu-item');
-    if (focused) return; // the button fires its own click
-    const item = state.actions[state.selectedIndex];
-    if (item) runMenu(item.id);
-  }
-}
-
-/* ── wafer illustration ───────────────────────────────────── */
-
-function drawWafer() {
-  const group = $('#waferDies');
-  if (!group || group.childElementCount) return;
-
-  const cx = 150; const cy = 150; const radius = 104;
-  const cell = 13; const gap = 2; const step = cell + gap;
-  const count = Math.floor((radius * 2) / step);
-  const start = -(count * step) / 2;
-  const frag = document.createDocumentFragment();
-
-  for (let row = 0; row < count; row += 1) {
-    for (let col = 0; col < count; col += 1) {
-      const x = start + col * step + (row % 2 ? step / 2 : 0);
-      const y = start + row * step;
-      const dx = x + cell / 2;
-      const dy = y + cell / 2;
-      if (Math.hypot(dx, dy) > radius - cell / 2) continue;
-      if (dy > radius - 10) continue;
-
-      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      rect.setAttribute('x', (cx + x).toFixed(1));
-      rect.setAttribute('y', (cy + y).toFixed(1));
-      rect.setAttribute('width', cell);
-      rect.setAttribute('height', cell);
-      rect.setAttribute('rx', '1.5');
-
-      const n = Math.sin((row * count + col) * 12.9898) * 43758.5453;
-      const r = n - Math.floor(n);
-      rect.setAttribute('class', r > 0.93
-        ? 'wafer-die wafer-die--hot'
-        : r > 0.62 ? 'wafer-die wafer-die--warm' : 'wafer-die');
-      frag.append(rect);
-    }
-  }
-  group.append(frag);
-}
+  if (event.key !== 'Escape') return;
+  if (modalOpen) { closeModal(); return; }
+  if (state.screen === 'desk') { stopClock(); go('menu'); }
+});
 
 /* ── boot ─────────────────────────────────────────────────── */
 
 function boot() {
   applySettings();
-  drawWafer();
 
   $('#newGameForm').addEventListener('submit', handleNewGame);
 
@@ -750,17 +591,14 @@ function boot() {
     e.target.classList.remove('field--invalid');
     const hint = $('#nameHint');
     hint.classList.remove('field-hint--error');
-    hint.textContent = 'Printed as “by …” on your company plate.';
+    hint.textContent = 'prints as “by …” on your company plate';
   });
 
   document.querySelectorAll('[data-action="settings"]').forEach((b) => b.addEventListener('click', openSettings));
-  document.querySelectorAll('[data-action="back-to-menu"]').forEach((b) => b.addEventListener('click', () => go('menu')));
-  document.querySelectorAll('[data-action="signout"]').forEach((b) => b.addEventListener('click', switchProfile));
+  document.querySelectorAll('[data-action="data"]').forEach((b) => b.addEventListener('click', openData));
+  document.querySelectorAll('.time button').forEach((b) => b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))));
 
-  document.addEventListener('keydown', onKeyDown);
-
-  const activeId = getActiveProfileId();
-  const active = activeId ? getProfile(activeId) : null;
+  const active = getProfile(getActiveProfileId());
   if (active) state.profile = active;
 
   go('menu');

@@ -1,78 +1,77 @@
-/* ─────────────────────────────────────────────────────────────
-   Silicon Empire — design tokens
-   Source of truth: design/styleguide.html
-   Dark is the default; light is kept at parity via [data-theme="light"]
-   ───────────────────────────────────────────────────────────── */
+/* Silicon Empire — tokens. Chunky borders, hard shadows, bold lowercase, lime accent. */
 
 :root {
-  /* surfaces — warm near-blacks, never blue-grey */
-  --paper-0: #12110E;
-  --paper-1: #1A1815;
-  --paper-2: #201D19;
-  --paper-3: #2A2620;
+  /* surfaces */
+  --bg: #131110;
+  --surface: #1C1917;
+  --surface-2: #262220;
+  --surface-3: #322D29;
+  --field: #2A2522;
 
   /* ink */
-  --ink-0: #F0EBDF;
-  --ink-1: #B9B2A3;
-  --ink-2: #8C8577;
+  --text: #F7F2E8;
+  --muted: #A99E8E;
+  --faint: #7C7264;
 
-  /* rules */
-  --rule: #332E26;
-  --rule-strong: #4A443A;
+  /* the border + shadow that give everything its sticker look */
+  --line: #F7F2E8;
+  --line-soft: #3A342F;
+  --shadow: 0 5px 0 #050403;
+  --shadow-sm: 0 3px 0 #050403;
 
   /* accents */
-  --green: #5C9E85;
-  --green-ink: #0E1512;
-  --red: #E2604A;
-  --red-ink: #1A0E0A;
-  --yellow: #F7CE46;
-  --yellow-ink: #1A1508;
+  --lime: #C9F74E;
+  --lime-ink: #1A2308;
+  --coral: #FF7A64;
+  --coral-ink: #2A0C06;
+  --sky: #7FD4FF;
+  --sky-ink: #06222C;
+  --violet: #B69BFF;
 
-  /* blueprint layer — technical surfaces only */
-  --bp: #6FD3F2;
-  --bp-grid: #254A5A;
-  --bp-faint: #173340;
-  --bp-bg: #0C1418;
+  /* art */
+  --art-dim: #4A443C;
+  --art-fill: #F7F2E8;
 
   /* form */
-  --shadow: 0 2px 0 #000;
-  --shadow-lift: 2px 3px 0 #000;
-  --radius: 16px;
-  --radius-sm: 11px;
-  --radius-pill: 999px;
+  --r-xl: 24px;
+  --r-lg: 18px;
+  --r-md: 14px;
+  --r-pill: 999px;
+  --bw: 3px;
+  --bw-sm: 2.5px;
 
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
-  --dur: 160ms;
+  --dur: 140ms;
   --ease: cubic-bezier(.2, .7, .3, 1);
 }
 
+/* Light keeps parity with the reference screenshots. */
 [data-theme="light"] {
-  --paper-0: #EDE9DE;
-  --paper-1: #F6F3EA;
-  --paper-2: #FAF9F4;
-  --paper-3: #FFFFFF;
+  --bg: #FDF3E4;
+  --surface: #FFFDF8;
+  --surface-2: #FFF6E7;
+  --surface-3: #F6E9D6;
+  --field: #FDF6E9;
 
-  --ink-0: #17170F;
-  --ink-1: #4A453B;
-  --ink-2: #7A7367;
+  --text: #14110C;
+  --muted: #6B6154;
+  --faint: #9A8F7E;
 
-  --rule: #D8D3C6;
-  --rule-strong: #B9B2A1;
+  --line: #14110C;
+  --line-soft: #E3D6C2;
+  --shadow: 0 5px 0 #14110C;
+  --shadow-sm: 0 3px 0 #14110C;
 
-  --green: #24453A;
-  --green-ink: #FAF9F4;
-  --red: #CD3E2D;
-  --red-ink: #FAF9F4;
-  --yellow: #FBD64A;
-  --yellow-ink: #17170F;
+  --lime: #C6F24E;
+  --lime-ink: #14110C;
+  --coral: #FF5C43;
+  --coral-ink: #14110C;
+  --sky: #4FC3F7;
+  --sky-ink: #14110C;
+  --violet: #9B7BFF;
 
-  --bp: #1F6E8A;
-  --bp-grid: #A8CBD8;
-  --bp-faint: #D5E6ED;
-  --bp-bg: #EAF3F6;
-
-  --shadow: 0 2px 0 #17170F;
-  --shadow-lift: 2px 3px 0 #17170F;
+  --art-dim: #C9BCA8;
+  --art-fill: #14110C;
 }
