@@ -1,77 +1,76 @@
-/* Silicon Empire — tokens. Chunky borders, hard shadows, bold lowercase, lime accent. */
+/* Silicon Empire — Neo-Brutalism, dark.
+   Rules: 3px ink borders, hard offset shadows with zero blur, saturated
+   blocks, tight radii, heavy lowercase type. No gradients, no soft shadows. */
 
 :root {
-  /* surfaces */
-  --bg: #131110;
-  --surface: #1C1917;
-  --surface-2: #262220;
-  --surface-3: #322D29;
-  --field: #2A2522;
+  --bg: #100F0D;
+  --panel: #1B1916;
+  --panel-2: #262320;
+  --panel-3: #332E29;
 
-  /* ink */
-  --text: #F7F2E8;
-  --muted: #A99E8E;
-  --faint: #7C7264;
+  --ink: #F7F2E7;
+  --ink-soft: #C9BFAF;
+  --ink-faint: #8C8272;
 
-  /* the border + shadow that give everything its sticker look */
-  --line: #F7F2E8;
-  --line-soft: #3A342F;
-  --shadow: 0 5px 0 #050403;
-  --shadow-sm: 0 3px 0 #050403;
+  --shadow-c: #000000;
 
-  /* accents */
-  --lime: #C9F74E;
-  --lime-ink: #1A2308;
-  --coral: #FF7A64;
-  --coral-ink: #2A0C06;
-  --sky: #7FD4FF;
-  --sky-ink: #06222C;
-  --violet: #B69BFF;
+  --lime: #C8F751;
+  --lime-ink: #10200A;
+  --coral: #FF6B4A;
+  --coral-ink: #2B0C05;
+  --sky: #6FD0FF;
+  --sky-ink: #061E2A;
+  --violet: #B49CFF;
+  --lemon: #FFE24A;
 
-  /* art */
-  --art-dim: #4A443C;
-  --art-fill: #F7F2E8;
+  --art-dim: #4C453C;
+  --art-fill: #F7F2E7;
 
-  /* form */
-  --r-xl: 24px;
-  --r-lg: 18px;
-  --r-md: 14px;
-  --r-pill: 999px;
+  /* readable accent *text* (fills keep the saturated colour) */
+  --pos: #C8F751;
+  --neg: #FF6B4A;
+
   --bw: 3px;
-  --bw-sm: 2.5px;
+  --r: 10px;
+  --r-sm: 8px;
+  --r-pill: 999px;
+
+  --shadow: 6px 6px 0 var(--shadow-c);
+  --shadow-sm: 4px 4px 0 var(--shadow-c);
+  --shadow-xs: 2px 2px 0 var(--shadow-c);
 
   --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
-  --dur: 140ms;
-  --ease: cubic-bezier(.2, .7, .3, 1);
+  --dur: 90ms;
+  --ease: linear;
 }
 
-/* Light keeps parity with the reference screenshots. */
+/* Light mode: the reference's home turf — cream page, ink borders. */
 [data-theme="light"] {
-  --bg: #FDF3E4;
-  --surface: #FFFDF8;
-  --surface-2: #FFF6E7;
-  --surface-3: #F6E9D6;
-  --field: #FDF6E9;
+  --bg: #F3EEDF;
+  --panel: #FFFCF4;
+  --panel-2: #F7F0DF;
+  --panel-3: #EBE2CD;
 
-  --text: #14110C;
-  --muted: #6B6154;
-  --faint: #9A8F7E;
+  --ink: #12100C;
+  --ink-soft: #4B4438;
+  --ink-faint: #6E6555;
 
-  --line: #14110C;
-  --line-soft: #E3D6C2;
-  --shadow: 0 5px 0 #14110C;
-  --shadow-sm: 0 3px 0 #14110C;
+  --shadow-c: #12100C;
 
   --lime: #C6F24E;
-  --lime-ink: #14110C;
+  --lime-ink: #12100C;
   --coral: #FF5C43;
-  --coral-ink: #14110C;
+  --coral-ink: #12100C;
   --sky: #4FC3F7;
-  --sky-ink: #14110C;
+  --sky-ink: #12100C;
   --violet: #9B7BFF;
+  --lemon: #FFD93D;
 
-  --art-dim: #C9BCA8;
-  --art-fill: #14110C;
+  --art-dim: #C6B9A3;
+  --art-fill: #12100C;
+
+  --pos: #2C6B00;
+  --neg: #B8341B;
 }

@@ -1,4 +1,4 @@
-/* reset + base type */
+/* reset + type. Everything is lowercase and heavy. */
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -6,43 +6,41 @@ html, body { height: 100%; }
 body {
   margin: 0;
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.45;
+  font-weight: 600;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
 
 h1, h2, h3, p, figure, dl, dd { margin: 0; }
-
 button, input, select { font: inherit; color: inherit; }
+svg { display: block; }
 
-/* everything reads lowercase, like the reference */
 .lbl {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .01em;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: .06em;
   text-transform: lowercase;
-  color: var(--muted);
+  color: var(--ink-faint);
 }
 
 .wordmark {
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .22em;
+  font-weight: 900;
+  letter-spacing: .26em;
   text-transform: lowercase;
-  color: var(--faint);
+  color: var(--ink-soft);
 }
 
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-
 .num { font-variant-numeric: tabular-nums; }
 
 :focus-visible {
-  outline: 3px solid var(--sky);
-  outline-offset: 3px;
-  border-radius: 6px;
+  outline: var(--bw) solid var(--lime);
+  outline-offset: 2px;
 }
 
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -50,15 +48,13 @@ button, input, select { font: inherit; color: inherit; }
 .i {
   width: 20px; height: 20px; flex: none;
   stroke: currentColor; fill: none;
-  stroke-width: 1.7;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .i--16 { width: 16px; height: 16px; }
 .i--24 { width: 24px; height: 24px; }
-.i--28 { width: 28px; height: 28px; }
 
-/* motion */
 html[data-motion="off"] *, html[data-motion="off"] *::before, html[data-motion="off"] *::after {
   animation: none !important;
   transition: none !important;
