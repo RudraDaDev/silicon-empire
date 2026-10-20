@@ -137,7 +137,9 @@ function renderMenu() {
   $('#menuMeta').textContent = profile
     ? `founded 1990 · by ${profile.name}`
     : 'start a new game to found one';
-  $('#menuProfile').textContent = profile ? initials(profile.name) : '—';
+  const badge = $('#menuProfile');
+  badge.hidden = !profile;
+  badge.textContent = profile ? initials(profile.name) : '';
   $('#menuStatus').textContent = save
     ? `${saves.length} save${saves.length === 1 ? '' : 's'} · week ${save.week}`
     : 'no save';

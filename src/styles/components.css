@@ -239,12 +239,3 @@
   background-size: 24px 24px, 24px 24px, 96px 96px, 96px 96px;
   background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
 }
-
-/* ledger pinstripe — 1px vertical every 18px */
-.pat.pat--pin {
-  background-image: repeating-linear-gradient(
-    90deg,
-    var(--pat-line-2) 0 1px,
-    transparent 1px 18px
-  );
-}

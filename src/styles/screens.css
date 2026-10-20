@@ -256,13 +256,18 @@ body[data-screen="desk"] #view-desk { display: grid; }
   overflow: auto;
 }
 
-/* Pinstripe lives in the two gutters only — the founders column is 540px,
-   so each stripe panel is half the view minus 270px and collapses to nothing
-   the moment there is no air left beside the form. */
-#view-newgame.pat--pin {
-  background-size: max(0px, calc(50% - 270px)) 100%, max(0px, calc(50% - 270px)) 100%;
-  background-position: left top, right top;
-  background-repeat: no-repeat, no-repeat;
+/* On a tall window the founding column sits in the optical middle instead of
+   hanging off the top. Only from 780px up: below that the centred content
+   could overflow a scroll container and lose its top edge. */
+@media (min-height: 780px) {
+  #view-newgame { align-content: center; }
+}
+
+/* the seed is a short number, not a name — give it its own width and figures */
+#seedInput {
+  max-width: 148px;
+  font-family: var(--mono);
+  letter-spacing: .04em;
 }
 
 .newgame-head { display: grid; gap: 5px; }
@@ -293,6 +298,7 @@ body[data-screen="desk"] #view-desk { display: grid; }
 
 .profiles { display: grid; gap: 8px; padding-top: 14px; border-top: var(--bw) solid var(--ink); }
 .profiles__head { display: flex; align-items: baseline; justify-content: space-between; }
+#profileList { max-height: 168px; overflow: auto; }
 
 .profile {
   display: flex; align-items: center; gap: 10px;
@@ -329,8 +335,8 @@ body[data-screen="desk"] #view-desk { display: grid; }
    · sidebar gutter needs ~120px of nav band left over, below 560px tall
      the nav items push into it
    · menu leftover closes up once the buttons wrap on narrow screens
-   (the new-game pinstripe guards itself: its gutter width is a calc that
-   reaches zero before the founders column runs out of room) */
+   (the founding screen carries no texture: its side margins are tall but
+   narrow, so any pattern there reads as corduroy rather than surface) */
 
 @media (max-height: 559px) {
   .side__nav.pat { background-image: none; }
