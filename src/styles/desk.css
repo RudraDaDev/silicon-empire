@@ -302,6 +302,15 @@
 .news-card[data-kind="supply"] { border-left: 7px solid var(--violet); }
 .news-card[data-kind="presentation"] { border-left: 7px solid var(--lemon); }
 
+/* ── geometric fill: size guard ────────────────────────────
+   The stage only gets its blueprint when the desk is in two columns and tall
+   enough to leave a margin wider than the 350px diorama; under that the
+   drawing already fills the panel and texture would crowd it. */
+
+@media (max-width: 1180px), (max-height: 699px) {
+  .stage.pat--grid { background-image: none; }
+}
+
 @media (max-width: 1180px) {
   .desk-body { grid-template-columns: 1fr; overflow: auto; }
   .rail { grid-template-rows: auto auto; }

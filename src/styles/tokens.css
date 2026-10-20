@@ -26,6 +26,11 @@
   --art-dim: #4C453C;
   --art-fill: #F7F2E7;
 
+  /* geometric fills — kept near-invisible so they read as surface, not content */
+  --pat-line: rgba(247, 242, 231, .10);
+  --pat-line-2: rgba(247, 242, 231, .16);
+  --pat-accent: rgba(200, 247, 81, .16);
+
   /* readable accent *text* (fills keep the saturated colour) */
   --pos: #C8F751;
   --neg: #FF6B4A;
@@ -70,6 +75,10 @@
 
   --art-dim: #C6B9A3;
   --art-fill: #12100C;
+
+  --pat-line: rgba(18, 16, 12, .10);
+  --pat-line-2: rgba(18, 16, 12, .18);
+  --pat-accent: rgba(44, 107, 0, .18);
 
   --pos: #2C6B00;
   --neg: #B8341B;

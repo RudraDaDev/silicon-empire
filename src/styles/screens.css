@@ -256,6 +256,15 @@ body[data-screen="desk"] #view-desk { display: grid; }
   overflow: auto;
 }
 
+/* Pinstripe lives in the two gutters only — the founders column is 540px,
+   so each stripe panel is half the view minus 270px and collapses to nothing
+   the moment there is no air left beside the form. */
+#view-newgame.pat--pin {
+  background-size: max(0px, calc(50% - 270px)) 100%, max(0px, calc(50% - 270px)) 100%;
+  background-position: left top, right top;
+  background-repeat: no-repeat, no-repeat;
+}
+
 .newgame-head { display: grid; gap: 5px; }
 .newgame-title {
   font-size: 34px;
@@ -312,6 +321,24 @@ body[data-screen="desk"] #view-desk { display: grid; }
 .profile__body { flex: 1; min-width: 0; }
 .profile__name { font-size: 14.5px; font-weight: 900; text-transform: lowercase; }
 .profile__meta { font-size: 11px; font-weight: 700; color: var(--ink-faint); text-transform: lowercase; }
+
+/* ── geometric fills: size guards ───────────────────────────
+   A texture only earns its place once the dead space is big enough to read
+   as a surface. Each region therefore switches itself off when the space it
+   fills collapses — measured, not guessed:
+   · sidebar gutter needs ~120px of nav band left over, below 560px tall
+     the nav items push into it
+   · menu leftover closes up once the buttons wrap on narrow screens
+   (the new-game pinstripe guards itself: its gutter width is a calc that
+   reaches zero before the founders column runs out of room) */
+
+@media (max-height: 559px) {
+  .side__nav.pat { background-image: none; }
+}
+
+@media (max-width: 899px), (max-height: 639px) {
+  .menu-grid.pat { background-image: none; }
+}
 
 @media (max-width: 720px) {
   .app { grid-template-columns: 80px minmax(0, 1fr); }

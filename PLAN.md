@@ -18,7 +18,7 @@
 | Save | `localStorage`, versioned, with export/import to file | Survives tab close; export protects against cleared storage. |
 | Naming | **~132 brands, 85% real-analogue off-names (Imtel, AMB, Nivida, Pomelo, Snapmo), 15% fictional.** Real dated tech events. | See `design/BRANDS.md`. Trademark-safer than real names, still historically legible. |
 | Scope | **Every tech product except medical and AI** — **175 products, 174 sellable** — variants are gated specs, not catalogue entries. Each designable, manufacturable and sellable, *and* consumable as an input to anything that contains it | See `design/DOMAINS.md`. Flat catalogue + containment graph + per-product **sell-or-consume** split. No tiers, no ladder. |
-| Visual language | **Warm dark, informal/editorial** — serif + mono, 2px rules, hard shadows. Blueprint layer for technical surfaces. | See `design/styleguide.html`. Distinctive, cheap to build, no art assets. |
+| Visual language | **Neo-Brutalism, dark by default** — 3px ink borders, zero-blur offset shadows, saturated lime/coral/sky blocks, heavy lowercase type. Geometric fills (dots, hatch, blueprint grid, pinstripe) only in dead space that is big enough to hold them. | See `src/styles/`. Restyles the existing shell in place — no new screens, no new flow. |
 
 **Rejected:** JSX, htm, Preact, React, Phaser, Pixi, Three. None are needed by a text-and-tables game, and the sim/view split means any of them can be added later behind one module boundary if a surface actually demands it.
 
