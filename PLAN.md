@@ -315,7 +315,91 @@ bedroom, run act 0 → gate → shuttle → first fabbed product, and reach CPUs
 The slice gets longer but the first ten minutes teach BOM, yield, reviews, runway and
 contract reading instead of dropping the player into a fab they cannot afford.
 
-**Open:** what PIP is; whether events pause or default; whether 2026 is a hard stop.
+**Open:** whether events pause or default; whether 2026 is a hard stop.
+
+---
+
+## 3c. PIP — the assistant
+
+**PIP does nothing. It only talks.** It cannot sign, price, hire, buy capacity or open a
+screen for you; every answer ends in a pointer to where *you* would do the thing. That
+restriction is the feature — an assistant that acts removes the game.
+
+**Diegetic cover for a 1990 setting:** PIP is a **rule-based expert system** distributed
+on shareware disks, running in a terminal window on the rig. That explains, in one line,
+why it is available at 18 with no money, why it is confident, and why it is sometimes
+wrong. It is not a language model and the game never pretends otherwise.
+
+**It knows only what is public:** segment sizes, prices, your own books, the news feed,
+the catalogue. Rival cash, roadmaps and margins are invisible until the browser screen
+buys intel — so "who is about to cut prices" is inference, not data.
+
+### 3c.1 Answers are a function of the tick
+
+`pip.ask(question, world)` must be **deterministic**: same tick, same question, same
+state ⇒ same answer. Asking again is not a reroll, so a player cannot fish for a better
+forecast. Asking next week gives a different answer because the world moved, which is
+the correct behaviour and reads as "it thought about it".
+
+Predictions draw from a **separate rng stream (`rngPip`)**, exactly like rival AI. PIP
+can therefore never perturb the sim, and a golden-file test can pin its answers.
+
+### 3c.2 Four kinds of answer
+
+| Kind | Example | Behaviour |
+|---|---|---|
+| **Recall** | "what did I spend on resin in march" | exact, from your books |
+| **Explain** | "why did reviews drop" | cites the 2–3 biggest contributions, no single opaque score |
+| **Predict** | "will dram prices rise this quarter" | always ships a confidence and a basis |
+| **Refuse** | "sign the fab deal for me" | declines in character, points at the screen |
+
+### 3c.3 Being wrong on purpose
+
+Every prediction carries a **confidence (0.55–0.95)**, and the game resolves it later:
+
+```
+accuracy(c) = c - drift
+drift = 0.00 short (≤4 weeks) · 0.10 seasonal (≤1 quarter) · 0.20 structural (years)
+shock (war, flood, recall, rate move) marks live predictions stale, -0.10
+```
+
+Horizon and subject matter move it, not mood: supply-chain calls are worse than your own
+P&L. A prediction is stored with its claim; at resolution it is scored hit or miss.
+
+**Track record is visible** in the PIP panel: `calls 23/31 · overconfident on supply`.
+That is the trust minigame — by act 2 you know to believe its cost estimates and ignore
+its market timing, and that knowledge is earned, not granted.
+
+### 3c.4 What it refuses to do
+
+- **Contracts.** PIP will not read a supplier page for you: "that is a lawyer's job."
+  Once you hire one, the lawyer annotates the sheet and PIP can discuss it — reading is
+  still your job in act 0/1, which is where the mechanic is taught.
+- **Actions.** No auto-pricing, no auto-hiring, no "fix it" button.
+- **Hidden state.** No rival internals, ever.
+- **Guarantees.** No answer phrased as certainty, even when it is right.
+
+### 3c.5 Where it lives
+
+The drawer's `pip` entry opens a panel: a transcript, a suggested-questions row (so the
+player learns what it can answer without guessing syntax), and the track record. It also
+appears as a one-line aside on event modals — never as a replacement for the decision.
+
+### 3c.6 Integration seam
+
+The engine is the user's own lite NLP implementation, vendored, not rewritten.
+
+- Lives in `vendor/pip/` (or `src/pip/`), **never** in `src/sim/` — R1 still holds.
+- Must be pure ES modules with **no network, no worker, no DOM** — it has to run in Node
+  for the determinism tests.
+- Exposed through one adapter, `src/ui/pip/adapter.js`:
+  `createPip({ engine, world, rngPip }) -> { ask(text) -> { kind, text, confidence, basis, topics, refs, offer } }`
+- If the engine fails to load, the adapter falls back to a small canned responder so the
+  game never breaks on a missing file.
+
+**Open questions for the handover:** entry-point signature, module format (ESM vs IIFE),
+whether it carries its own RNG or takes a seed, total size, and whether intents are
+extensible without editing the engine.
 
 ---
 
