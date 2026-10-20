@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Silicon Empire — Design Language</title>
+<style>
+/* ─────────────────────────────────────────────
+   TOKENS — dark is default, light kept for parity
+   ───────────────────────────────────────────── */
+:root{
+  --paper-0:#12110E;   /* page */
+  --paper-1:#1A1815;   /* surface */
+  --paper-2:#201D19;   /* card */
+  --paper-3:#2A2620;   /* raised / hover */
+  --ink-0:#F0EBDF;     /* primary text — the old paper */
+  --ink-1:#B9B2A3;
+  --ink-2:#8C8577;     /* meta only, 12px+ */
+  --rule:#332E26;
+  --rule-strong:#4A443A;
+  --green:#5C9E85;
+  --green-ink:#0E1512;
+  --red:#E2604A;
+  --red-ink:#1A0E0A;
+  --yellow:#F7CE46;
+  --yellow-ink:#1A1508;
+  --bp:#6FD3F2;        /* blueprint cyan */
+  --bp-grid:#254A5A;
+  --bp-faint:#173340;
+  --shadow:0 2px 0 #000;
+  --radius:16px;
+  --radius-sm:11px;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --grid-bg:none;
+}
+[data-theme="light"]{
+  --paper-0:#EDE9DE; --paper-1:#F6F3EA; --paper-2:#FAF9F4; --paper-3:#FFFFFF;
+  --ink-0:#17170F; --ink-1:#4A453B; --ink-2:#7A7367;
+  --rule:#D8D3C6; --rule-strong:#B9B2A1;
+  --green:#24453A; --green-ink:#FAF9F4; --red:#CD3E2D; --red-ink:#FAF9F4;
+  --yellow:#FBD64A; --yellow-ink:#17170F;
+  --bp:#1F6E8A; --bp-grid:#A8CBD8; --bp-faint:#D5E6ED;
+  --shadow:0 2px 0 #17170F;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper-0); color:var(--ink-0);
+  font-family:var(--serif); font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:80px;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* ── micro-label ── */
+.lbl{
+  font-family:var(--mono); font-size:10.5px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2);
+}
+.lbl--ink{color:var(--ink-1)}
+
+/* ─────────────────────────────────────────────
+   TOP BAR
+   ───────────────────────────────────────────── */
+.topbar{
+  border-bottom:2px solid var(--rule-strong);
+  background:var(--paper-1);
+  position:sticky; top:0; z-index:50;
+}
+.topbar .wrap{display:flex;align-items:center;gap:18px;height:74px}
+.wordmark{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1}
+.wordmark small{
+  display:block;font-family:var(--mono);font-size:10.5px;font-weight:400;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);margin-top:5px;
+}
+.spacer{flex:1}
+
+/* ── buttons ── */
+.btn{
+  font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.11em;
+  text-transform:uppercase;padding:11px 17px;border-radius:var(--radius-sm);
+  border:2px solid var(--ink-0);background:transparent;color:var(--ink-0);
+  cursor:pointer;box-shadow:var(--shadow);transition:transform .08s,box-shadow .08s;
+}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:2px 3px 0 #000}
+.btn:active{transform:translate(1px,2px);box-shadow:0 0 0 #000}
+.btn--solid{background:var(--ink-0);color:var(--paper-0);border-color:var(--ink-0)}
+.btn--green{background:var(--green);color:var(--green-ink);border-color:var(--green)}
+.btn--red{background:var(--red);color:var(--red-ink);border-color:var(--red)}
+.btn--ghost{border-color:var(--rule-strong);color:var(--ink-1);box-shadow:none}
+.icon-btn{
+  width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  border:2px solid var(--rule-strong);background:transparent;color:var(--ink-1);
+  cursor:pointer;font-family:var(--mono);font-size:15px;
+}
+
+/* ─────────────────────────────────────────────
+   TABS — segmented, active = inverted
+   ───────────────────────────────────────────── */
+.tabs{display:flex;border:2px solid var(--rule-strong);border-radius:14px;overflow:hidden}
+.tab{
+  flex:1;padding:13px 10px;background:transparent;border:0;cursor:pointer;
+  border-right:2px solid var(--rule-strong);
+  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-1);
+}
+.tab:last-child{border-right:0}
+.tab[aria-selected="true"]{background:var(--ink-0);color:var(--paper-0)}
+.tab:hover:not([aria-selected="true"]){background:var(--paper-3)}
+
+/* ─────────────────────────────────────────────
+   SECTION FRAME
+   ───────────────────────────────────────────── */
+section.block{padding:44px 0 10px;border-bottom:2px dashed var(--rule)}
+section.block:last-of-type{border-bottom:0}
+.h2{font-size:26px;margin:6px 0 4px;letter-spacing:-.01em}
+.lede{color:var(--ink-1);margin:0 0 26px;max-width:68ch}
+
+/* ── cards ── */
+.card{
+  background:var(--paper-2);border:2px solid var(--rule);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:var(--shadow);position:relative;
+}
+.card--spine{padding-left:26px}
+.card--spine::before{
+  content:"";position:absolute;left:12px;top:16px;bottom:16px;width:4px;
+  background:var(--yellow);border-radius:2px;
+}
+.card--green{border-color:var(--green)}
+.card--red{border-color:var(--red)}
+
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+
+/* ── stat ── */
+.stat .lbl{display:block;margin-bottom:7px}
+.stat .val{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.stat .val small{font-size:15px;font-weight:400;color:var(--ink-2)}
+.delta{font-family:var(--mono);font-size:11px;letter-spacing:.02em}
+.up{color:var(--green)} .down{color:var(--red)}
+
+/* ── pills ── */
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;
+  border:1.5px solid var(--rule-strong);font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-1);
+}
+.pill--green{background:var(--green);color:var(--green-ink);border-color:var(--green);font-weight:600}
+.pill--yellow{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow);font-weight:600}
+.pill--red{background:var(--red);color:var(--red-ink);border-color:var(--red);font-weight:600}
+.pill--bp{color:var(--bp);border-color:var(--bp)}
+
+/* ── swatches ── */
+.sw{border:2px solid var(--rule);border-radius:var(--radius-sm);overflow:hidden}
+.sw .chip{height:66px}
+.sw .meta{padding:8px 10px;background:var(--paper-1)}
+.sw .meta b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.04em}
+.sw .meta span{font-family:var(--mono);font-size:10px;color:var(--ink-2)}
+
+/* ── table ── */
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-2);text-align:left;
+  padding:0 10px 8px;border-bottom:2px solid var(--rule-strong);
+}
+.tbl td{padding:9px 10px;border-bottom:1px dashed var(--rule)}
+.tbl td.num{font-family:var(--mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .tot td{border-top:2px solid var(--rule-strong);font-weight:700;border-bottom:0}
+
+/* ── torn edge ── */
+.torn{height:12px;background-repeat:repeat-x;background-size:16px 12px;
+  background-image:linear-gradient(135deg,var(--paper-0) 50%,transparent 50%),
+                   linear-gradient(225deg,var(--paper-0) 50%,transparent 50%);}
+
+/* ─────────────────────────────────────────────
+   BLUEPRINT SURFACES
+   ───────────────────────────────────────────── */
+.bp{
+  position:relative;background-color:#0C1418;border:2px solid var(--bp);
+  border-radius:var(--radius);overflow:hidden;
+}
+.bp::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(to right,var(--bp-faint) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--bp-faint) 1px,transparent 1px),
+    linear-gradient(to right,var(--bp-grid) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--bp-grid) 1px,transparent 1px);
+  background-size:10px 10px,10px 10px,50px 50px,50px 50px;
+  opacity:.55;
+}
+.bp > *{position:relative;z-index:1}
+.bp-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-bottom:1px solid var(--bp-grid);
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--bp);
+}
+.bp-body{padding:18px}
+.bp-corner{position:absolute;width:14px;height:14px;border:0 solid var(--bp);pointer-events:none}
+.bp-corner.tl{top:7px;left:7px;border-top-width:2px;border-left-width:2px}
+.bp-corner.tr{top:7px;right:7px;border-top-width:2px;border-right-width:2px}
+.bp-corner.bl{bottom:7px;left:7px;border-bottom-width:2px;border-left-width:2px}
+.bp-corner.br{bottom:7px;right:7px;border-bottom-width:2px;border-right-width:2px}
+
+.dim{position:relative;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--bp)}
+.dim::before,.dim::after{content:"";position:absolute;background:var(--bp);opacity:.7}
+
+/* designer layout */
+.designer{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
+@media(max-width:980px){.designer{grid-template-columns:1fr}}
+.spec{margin-bottom:20px}
+.spec-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.spec-name{font-size:15px}
+.spec-val{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink-0)}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;
+  background:var(--rule-strong);outline:none;margin:0;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:19px;height:19px;border-radius:50%;
+  background:var(--yellow);border:2px solid var(--paper-0);cursor:grab;
+  box-shadow:0 0 0 1px var(--yellow);
+}
+input[type=range]::-moz-range-thumb{
+  width:19px;height:19px;border-radius:50%;background:var(--yellow);
+  border:2px solid var(--paper-0);cursor:grab;
+}
+.spec-hint{font-family:var(--mono);font-size:10px;color:var(--ink-2);letter-spacing:.06em;margin-top:6px}
+
+.node-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.node{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:7px 11px;
+  border-radius:9px;border:1.5px solid var(--rule-strong);color:var(--ink-2);
+  background:transparent;cursor:not-allowed;
+}
+.node[data-on]{border-color:var(--yellow);color:var(--yellow);background:rgba(247,206,70,.08)}
+.node[data-future]{opacity:.45}
+
+/* meter */
+.meter{height:9px;border-radius:5px;background:var(--paper-3);overflow:hidden;border:1px solid var(--rule)}
+.meter > i{display:block;height:100%;border-radius:5px}
+
+.footnote{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+hr.dash{border:0;border-top:2px dashed var(--rule);margin:18px 0}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <h1 class="wordmark">Silicon Empire<small>class of 1990 · semiconductor tycoon</small></h1>
+    <div class="spacer"></div>
+    <button class="icon-btn" title="Help">?</button>
+    <button class="btn btn--ghost" id="themeBtn">Light</button>
+    <button class="btn btn--red">New Game</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 1. PALETTE ───────────────────────────── -->
+  <section class="block" id="palette">
+    <span class="lbl">§ 01 / Colour</span>
+    <h2 class="h2">A warm dark, not a black terminal</h2>
+    <p class="lede">Your paper cream inverts into the text colour. Nothing turns grey-blue or clinical — every surface keeps the same brown-yellow cast, so the family reads identically in both modes.</p>
+
+    <div class="grid g4" style="margin-bottom:14px">
+      <div class="sw"><div class="chip" style="background:#12110E"></div><div class="meta"><b>paper-0</b><span>#12110E page</span></div></div>
+      <div class="sw"><div class="chip" style="background:#1A1815"></div><div class="meta"><b>paper-1</b><span>#1A1815 surface</span></div></div>
+      <div class="sw"><div class="chip" style="background:#201D19"></div><div class="meta"><b>paper-2</b><span>#201D19 card</span></div></div>
+      <div class="sw"><div class="chip" style="background:#2A2620"></div><div class="meta"><b>paper-3</b><span>#2A2620 raised</span></div></div>
+    </div>
+    <div class="grid g4" style="margin-bottom:14px">
+      <div class="sw"><div class="chip" style="background:#F0EBDF"></div><div class="meta"><b>ink-0</b><span>#F0EBDF text</span></div></div>
+      <div class="sw"><div class="chip" style="background:#B9B2A3"></div><div class="meta"><b>ink-1</b><span>#B9B2A3 secondary</span></div></div>
+      <div class="sw"><div class="chip" style="background:#8C8577"></div><div class="meta"><b>ink-2</b><span>#8C8577 meta</span></div></div>
+      <div class="sw"><div class="chip" style="background:#332E26"></div><div class="meta"><b>rule</b><span>#332E26 borders</span></div></div>
+    </div>
+    <div class="grid g4">
+      <div class="sw"><div class="chip" style="background:#5C9E85"></div><div class="meta"><b>green</b><span>#5C9E85 profit</span></div></div>
+      <div class="sw"><div class="chip" style="background:#E2604A"></div><div class="meta"><b>red</b><span>#E2604A loss</span></div></div>
+      <div class="sw"><div class="chip" style="background:#F7CE46"></div><div class="meta"><b>yellow</b><span>#F7CE46 action</span></div></div>
+      <div class="sw"><div class="chip" style="background:#6FD3F2"></div><div class="meta"><b>blueprint</b><span>#6FD3F2 technical</span></div></div>
+    </div>
+  </section>
+
+  <!-- 2. TYPE ──────────────────────────────── -->
+  <section class="block" id="type">
+    <span class="lbl">§ 02 / Type</span>
+    <h2 class="h2">Serif for the game, mono for the machine</h2>
+    <p class="lede">Two voices. Serif carries names, prose and headlines. Mono carries every number, unit, label and status — it's what makes dense data scannable and keeps columns aligned.</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <span class="lbl">Display / Serif</span>
+        <div style="font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:10px 0 4px">Die floorplan<br>and yield</div>
+        <p style="margin:0;color:var(--ink-1)">The 486 DX arrives at 1.2 million transistors on a 1&nbsp;µm process. Nothing here should feel like a spreadsheet.</p>
+        <hr class="dash">
+        <p style="margin:0;font-size:14px;color:var(--ink-2)">Small serif for body copy and event text, 16px / 1.55.</p>
+      </div>
+      <div class="card">
+        <span class="lbl">Data / Mono</span>
+        <div style="font-family:var(--mono);margin-top:12px;display:grid;gap:9px;font-size:13px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--ink-2)">CLOCK</span><span>66 MHz</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--ink-2)">DIE AREA</span><span>118 mm²</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--ink-2)">TRANSISTORS</span><span>1.2 M</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--ink-2)">YIELD @ RAMP</span><span style="color:var(--yellow)">62.4 %</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--ink-2)">UNIT COST</span><span>$41.80</span></div>
+        </div>
+        <hr class="dash">
+        <span class="lbl">MICRO LABEL · 10.5px · TRACKING .14EM</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. COMPONENTS ────────────────────────── -->
+  <section class="block" id="components">
+    <span class="lbl">§ 03 / Parts</span>
+    <h2 class="h2">The same vocabulary, darkened</h2>
+    <p class="lede">Hard offset shadows, no blur. Thick 2px borders. Active states invert rather than glow — that's your screenshot's strongest move and it works even better on dark.</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <span class="lbl" style="display:block;margin-bottom:12px">Segmented tabs</span>
+        <div class="tabs">
+          <button class="tab" aria-selected="true">Design</button>
+          <button class="tab">Lab</button>
+          <button class="tab">Fab</button>
+          <button class="tab">Market</button>
+        </div>
+        <hr class="dash">
+        <span class="lbl" style="display:block;margin-bottom:12px">Buttons &amp; pills</span>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn--solid">Ship</button>
+          <button class="btn btn--green">Fund</button>
+          <button class="btn btn--red">Recall</button>
+          <button class="btn btn--ghost">Cancel</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <span class="pill pill--green">✓ Shipped</span>
+          <span class="pill pill--yellow">Ramping</span>
+          <span class="pill pill--red">Defective</span>
+          <span class="pill">350 nm</span>
+        </div>
+      </div>
+
+      <div class="card card--spine">
+        <span class="lbl">Event card / left spine</span>
+        <h3 style="margin:8px 0 6px;font-size:19px">The 486 lands</h3>
+        <p style="margin:0 0 12px;color:var(--ink-1);font-size:14.5px">Inteq ships a 1&nbsp;µm part with an integrated FPU. Your 386 refresh suddenly looks tired.</p>
+        <div style="display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-2)">
+          <span>1990 · W03</span><span>·</span><span>MARKET</span>
+          <div class="spacer"></div>
+          <span class="delta down">▼ share −1.8%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g4" style="margin-top:14px">
+      <div class="card stat"><span class="lbl">Cash</span><div class="val">$4.2<small>M</small></div><span class="delta up">▲ $310k / wk</span></div>
+      <div class="card stat"><span class="lbl">Revenue</span><div class="val">$1.9<small>M</small></div><span class="delta up">▲ 6.4%</span></div>
+      <div class="card stat"><span class="lbl">Share</span><div class="val">7.1<small>%</small></div><span class="delta up">▲ 0.3</span></div>
+      <div class="card stat card--red"><span class="lbl">Burn</span><div class="val">$84<small>k</small></div><span class="delta down">▼ 12 wk runway</span></div>
+    </div>
+  </section>
+
+  <!-- 4. DESIGNER ──────────────────────────── -->
+  <section class="block" id="designer">
+    <span class="lbl">§ 04 / Designer</span>
+    <h2 class="h2">Spec sheet as a drafting sheet</h2>
+    <p class="lede">The designer is the one screen where the blueprint language earns its place: cyan hairlines, 10/50px grid, registration corners, dimension callouts, <em>FIG.</em> and <em>SHEET</em> annotations. Everything else stays warm paper.</p>
+
+    <div class="designer">
+
+      <!-- FLOORPLAN -->
+      <div class="bp">
+        <div class="bp-corner tl"></div><div class="bp-corner tr"></div>
+        <div class="bp-corner bl"></div><div class="bp-corner br"></div>
+        <div class="bp-head">
+          <span>Fig. 1 — die floorplan</span>
+          <span>ISX-486 · rev C</span>
+        </div>
+        <div class="bp-body">
+          <svg viewBox="0 0 420 300" width="100%" style="display:block">
+            <!-- dimension: top -->
+            <g stroke="#6FD3F2" stroke-width="1" fill="none" opacity=".85">
+              <line x1="46" y1="22" x2="374" y2="22"/>
+              <line x1="46" y1="17" x2="46" y2="27"/>
+              <line x1="374" y1="17" x2="374" y2="27"/>
+            </g>
+            <text x="210" y="14" fill="#6FD3F2" font-family="ui-monospace,monospace" font-size="9" text-anchor="middle" letter-spacing="1.2">16.4 mm</text>
+
+            <!-- dimension: left -->
+            <g stroke="#6FD3F2" stroke-width="1" fill="none" opacity=".85">
+              <line x1="24" y1="44" x2="24" y2="272"/>
+              <line x1="19" y1="44" x2="29" y2="44"/>
+              <line x1="19" y1="272" x2="29" y2="272"/>
+            </g>
+            <text x="14" y="158" fill="#6FD3F2" font-family="ui-monospace,monospace" font-size="9" text-anchor="middle" letter-spacing="1.2" transform="rotate(-90 14 158)">7.2 mm</text>
+
+            <!-- die outline -->
+            <rect x="46" y="44" width="328" height="228" fill="rgba(111,211,242,.04)"
+                  stroke="#6FD3F2" stroke-width="1.6"/>
+
+            <!-- blocks -->
+            <g stroke="#6FD3F2" stroke-width="1" fill="rgba(111,211,242,.07)">
+              <rect x="54" y="52" width="128" height="96"/>
+              <rect x="188" y="52" width="88" height="96"/>
+              <rect x="282" y="52" width="84" height="46"/>
+              <rect x="282" y="104" width="84" height="44"/>
+              <rect x="54" y="154" width="150" height="50"/>
+              <rect x="210" y="154" width="156" height="50"/>
+              <rect x="54" y="210" width="312" height="54"/>
+            </g>
+            <!-- labels -->
+            <g font-family="ui-monospace,monospace" font-size="8.5" fill="#6FD3F2" letter-spacing=".9">
+              <text x="64" y="104">L1 / 8 KB</text>
+              <text x="198" y="104">FPU</text>
+              <text x="292" y="79">L2 TAG</text>
+              <text x="292" y="131">L2 / 256 KB</text>
+              <text x="64" y="182">ALU ×2</text>
+              <text x="220" y="182">DECODE / µROM</text>
+              <text x="64" y="240">BUS INTERFACE · PAD RING</text>
+            </g>
+
+            <!-- crosshairs -->
+            <g stroke="#6FD3F2" stroke-width=".7" opacity=".5">
+              <line x1="54" y1="148" x2="366" y2="148" stroke-dasharray="3 4"/>
+              <line x1="282" y1="52" x2="282" y2="204" stroke-dasharray="3 4"/>
+            </g>
+
+            <!-- annotations -->
+            <g fill="#6FD3F2" font-family="ui-monospace,monospace" font-size="7.5" opacity=".75" letter-spacing="1">
+              <text x="46" y="288">SCALE 1:1</text>
+              <text x="196" y="288">SHEET 01 / 04</text>
+              <text x="336" y="288">1990 · 1.0 µm</text>
+            </g>
+          </svg>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;padding:0 18px 16px">
+          <span class="pill pill--bp">1.2 M transistors</span>
+          <span class="pill pill--bp">118 mm²</span>
+          <span class="pill pill--bp">3.1 W</span>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div class="card">
+          <span class="lbl">Codename</span>
+          <div style="display:flex;gap:10px;margin-top:8px;align-items:center">
+            <input value="ISX-486" style="flex:1;background:var(--paper-1);border:2px solid var(--rule-strong);border-radius:10px;padding:9px 12px;color:var(--ink-0);font-family:var(--mono);font-size:14px;outline:none">
+            <span class="pill pill--yellow">Draft</span>
+          </div>
+          <hr class="dash">
+          <span class="lbl">Process node</span>
+          <div class="node-picker">
+            <button class="node" data-future>800 nm · 1989</button>
+            <button class="node" data-on>1.0 µm · 1990</button>
+            <button class="node" data-future>600 nm · 1994</button>
+            <button class="node" data-future>350 nm · 1997</button>
+          </div>
+          <div class="spec-hint">Greyed nodes unlock on their release year.</div>
+        </div>
+
+        <div class="card">
+          <div class="spec">
+            <div class="spec-top"><span class="spec-name">Clock</span><span class="spec-val">66 MHz</span></div>
+            <input type="range" min="0" max="100" value="38">
+            <div class="spec-hint">+8 MHz ≈ −3% yield · +0.4 W</div>
+          </div>
+          <div class="spec">
+            <div class="spec-top"><span class="spec-name">L1 cache</span><span class="spec-val">8 KB</span></div>
+            <input type="range" min="0" max="100" value="55">
+            <div class="spec-hint">+4 KB ≈ +9 mm² die</div>
+          </div>
+          <div class="spec">
+            <div class="spec-top"><span class="spec-name">Pipeline depth</span><span class="spec-val">5 stages</span></div>
+            <input type="range" min="0" max="100" value="30">
+            <div class="spec-hint">Deeper fights clock, costs branch penalty</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">
+            <span class="lbl">Estimated margin</span>
+            <span style="font-family:var(--mono);font-size:13px;color:var(--green)">31.4%</span>
+          </div>
+          <div class="meter"><i style="width:31.4%;background:var(--green)"></i></div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px">
+            <span class="footnote">$41.80 unit</span>
+            <span class="footnote">$61.00 MSRP</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BOM -->
+    <div class="card" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+        <span class="lbl">Bill of materials — per unit</span>
+        <span class="pill pill--bp">62.4% yield</span>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Line item</th><th style="text-align:right">Qty</th><th style="text-align:right">Cost</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Die (1.0 µm)</td><td class="num">1</td><td class="num">$18.40</td><td style="color:var(--ink-2);font-size:13px">621 good dies / wafer</td></tr>
+          <tr><td>Packaging</td><td class="num">1</td><td class="num">$6.20</td><td style="color:var(--ink-2);font-size:13px">PGA-168</td></tr>
+          <tr><td>Substrate &amp; pins</td><td class="num">1</td><td class="num">$4.10</td><td style="color:var(--ink-2);font-size:13px">ceramic</td></tr>
+          <tr><td>Test &amp; bin</td><td class="num">1</td><td class="num">$3.90</td><td style="color:var(--ink-2);font-size:13px">2 bins</td></tr>
+          <tr><td>Fab amortisation</td><td class="num">—</td><td class="num">$9.20</td><td style="color:var(--ink-2);font-size:13px">$1.8B / 5 yr</td></tr>
+          <tr class="tot"><td>Total unit cost</td><td class="num"></td><td class="num">$41.80</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. RULES ─────────────────────────────── -->
+  <section class="block" id="rules">
+    <span class="lbl">§ 05 / Rules</span>
+    <h2 class="h2">What keeps it coherent</h2>
+    <div class="grid g3">
+      <div class="card card--spine">
+        <span class="lbl">Rule 01</span>
+        <h3 style="margin:6px 0 6px;font-size:17px">Blueprints are for machines</h3>
+        <p style="margin:0;font-size:14px;color:var(--ink-1)">Cyan + grid only on technical surfaces: die plan, wafer map, tech tree, process. Never on financials or news.</p>
+      </div>
+      <div class="card card--spine">
+        <span class="lbl">Rule 02</span>
+        <h3 style="margin:6px 0 6px;font-size:17px">Numbers are always mono</h3>
+        <p style="margin:0;font-size:14px;color:var(--ink-1)">Tabular figures, right-aligned, unit in a dimmed span. If it can be compared down a column, it is mono.</p>
+      </div>
+      <div class="card card--spine">
+        <span class="lbl">Rule 03</span>
+        <h3 style="margin:6px 0 6px;font-size:17px">Colour never alone</h3>
+        <p style="margin:0;font-size:14px;color:var(--ink-1)">Every gain/loss carries ▲▼ and a sign. Colourblind palettes swap the three accents without touching layout.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap" style="padding:30px 20px 0">
+  <div class="footnote">Silicon Empire · design language v1 · dark default, light parity</div>
+</footer>
+
+<script>
+  document.getElementById('themeBtn').addEventListener('click', e => {
+    const root = document.documentElement;
+    const light = root.dataset.theme === 'light';
+    root.dataset.theme = light ? 'dark' : 'light';
+    e.target.textContent = light ? 'Light' : 'Dark';
+  });
+</script>
+</body>
+</html>
