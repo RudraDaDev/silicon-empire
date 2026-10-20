@@ -1,0 +1,121 @@
+/* ── reset + base ─────────────────────────────────────────── */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper-0);
+  color: var(--ink-0);
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden; /* the desk is a device, not a page */
+}
+
+h1, h2, h3, p, figure { margin: 0; }
+
+button, input, select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ── type utilities ───────────────────────────────────────── */
+
+.lbl {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.lbl--ink { color: var(--ink-1); }
+
+.wordmark-spaced {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.footnote {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── focus ────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── motion ───────────────────────────────────────────────── */
+
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ── icon defaults ────────────────────────────────────────── */
+
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.i {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+.i--16 { width: 16px; height: 16px; }
+.i--24 { width: 24px; height: 24px; }
+
+/* ── screens ──────────────────────────────────────────────── */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+}
+
+body[data-screen="login"] .screen--login,
+body[data-screen="menu"] .screen--menu {
+  display: grid;
+}
+
+/* text scale — stopgap until token-driven rem scale */
+body[data-scale="lg"] { zoom: 1.12; }
+body[data-scale="xl"] { zoom: 1.24; }

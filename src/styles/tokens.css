@@ -1,0 +1,78 @@
+/* ─────────────────────────────────────────────────────────────
+   Silicon Empire — design tokens
+   Source of truth: design/styleguide.html
+   Dark is the default; light is kept at parity via [data-theme="light"]
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* surfaces — warm near-blacks, never blue-grey */
+  --paper-0: #12110E;
+  --paper-1: #1A1815;
+  --paper-2: #201D19;
+  --paper-3: #2A2620;
+
+  /* ink */
+  --ink-0: #F0EBDF;
+  --ink-1: #B9B2A3;
+  --ink-2: #8C8577;
+
+  /* rules */
+  --rule: #332E26;
+  --rule-strong: #4A443A;
+
+  /* accents */
+  --green: #5C9E85;
+  --green-ink: #0E1512;
+  --red: #E2604A;
+  --red-ink: #1A0E0A;
+  --yellow: #F7CE46;
+  --yellow-ink: #1A1508;
+
+  /* blueprint layer — technical surfaces only */
+  --bp: #6FD3F2;
+  --bp-grid: #254A5A;
+  --bp-faint: #173340;
+  --bp-bg: #0C1418;
+
+  /* form */
+  --shadow: 0 2px 0 #000;
+  --shadow-lift: 2px 3px 0 #000;
+  --radius: 16px;
+  --radius-sm: 11px;
+  --radius-pill: 999px;
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --dur: 160ms;
+  --ease: cubic-bezier(.2, .7, .3, 1);
+}
+
+[data-theme="light"] {
+  --paper-0: #EDE9DE;
+  --paper-1: #F6F3EA;
+  --paper-2: #FAF9F4;
+  --paper-3: #FFFFFF;
+
+  --ink-0: #17170F;
+  --ink-1: #4A453B;
+  --ink-2: #7A7367;
+
+  --rule: #D8D3C6;
+  --rule-strong: #B9B2A1;
+
+  --green: #24453A;
+  --green-ink: #FAF9F4;
+  --red: #CD3E2D;
+  --red-ink: #FAF9F4;
+  --yellow: #FBD64A;
+  --yellow-ink: #17170F;
+
+  --bp: #1F6E8A;
+  --bp-grid: #A8CBD8;
+  --bp-faint: #D5E6ED;
+  --bp-bg: #EAF3F6;
+
+  --shadow: 0 2px 0 #17170F;
+  --shadow-lift: 2px 3px 0 #17170F;
+}
