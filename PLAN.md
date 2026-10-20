@@ -179,6 +179,146 @@ serialize(state) / deserialize(json)              // -> string / state
 
 ---
 
+## 3b. Gameplay loop
+
+**The loop is one sentence: read the market, commit silicon to a bet, live with it.**
+The heartbeat is the product generation, not the week — design → tape-out → ramp →
+launch → harvest → obsolete, two to three years each, twelve to fifteen of them
+between 1990 and 2026.
+
+Two clocks run at once. **Money is weekly. Silicon is 6–18 months.** The gap between
+them — spending today for revenue that may arrive after the window has shut — is the
+whole game.
+
+### 3b.1 Act 0 — the bedroom, January 1990
+
+You are 18. Savings are **7,000–18,000, seeded** (the same seed always gives the same
+number). You own one thing: a **salvaged 1988 stereolithography rig** — an industrial
+machine bought at auction, prints resin, jams often. (The catalogue's *3D printer*,
+E42, stays a 2008 sellable product; this is a tool, not a product.)
+
+No staff, no credit, no suppliers. The rig prints **geometry only** — cases, keycaps,
+mouse shells. Switches, PCB, MCU and cable are bought at list price from a hobby
+catalogue: MOQ 1, no credit, 2-week lead time. Assembly is your hands.
+
+**You can make four things, and they are the tutorial.** Every input is a real
+catalogue row, so the containment graph is exercised from tick one.
+
+| SKU | Built from | Print slots | BOM | Price | Margin |
+|---|---|---|---|---|---|
+| keyboard | E30 ← D58 switches, D60 PCB, B1 MCU, E36 cable, D54 case* | 2 | ~45 | ~89 | ~44 |
+| mouse | E31 ← sensor, B1 MCU, D58 buttons, E36 cable, D54 shell* | 1 | ~15 | ~39 | ~24 |
+| keycap set | D54* | 1 | ~5 | ~19 | ~14 |
+| case | D54* | 1 | ~8 | ~25 | ~17 |
+
+\* printed on the rig. **16 slots/week**, **12% scrap** (a failed print eats the resin,
+not the bought parts). **Living costs 150/week**, which is the pressure that makes the
+rig run every week and teaches the runway battery before any other screen does.
+
+**Demand is the binding constraint, not capacity.** Weekly orders start at 2 and grow
+with cumulative units sold and review score — sell out and the queue grows, overbuild
+and cash sits in a cupboard. **Reviews (0–100)** come from defect escape rate, price
+against comparable, and delivery speed; they are the only marketing you have.
+
+Interrupts, roughly eight in the act: resin runs out mid-week · rig jams (loses a week
+or pay for a service) · a computer fair wants 20 units by Friday · a defect return ·
+a magazine ad costs 200 for a week · a hobbyist asks for a custom run · a brand emails
+asking who you are · the gate.
+
+**Pacing:** 40–70 weeks of game time at good play, never fewer than 25. The act is
+decision-paced, not clock-paced — at 4× the whole thing is twenty seconds of clock and
+six to ten minutes of play. Balance gate: median policy reaches the gate in 40–70
+weeks; no policy goes bankrupt after 1991.
+
+### 3b.2 The gate — credit standing
+
+The rule is exact and visible: **cash in hand ≥ starting savings + 10,000.** Cash, not
+net worth — stock and tools do not buy you a meeting, and a player should not be able
+to corner the gate by hoarding filament.
+
+This is not a level. Nothing is announced. What changes is that **people answer the
+phone**: nine suppliers send quotes and three brands open an OEM conversation, because
+you can now put down a deposit. The desk shows one line — `capital raised 3,400 / 10,000`.
+
+*Starting cash is therefore difficulty, not progress:* 7k means thin buffer and no bulk
+buying; 18k means you can buy switches in hundreds and survive a bad month. The gate is
+the same distance for both.
+
+### 3b.3 Act 1 — suppliers and contracts
+
+Nine suppliers exist at the gate: **three fabs, three factories, three PCB houses**,
+each with a personality that shows up in the terms rather than in a stat block.
+
+| House | Personality | Shows up as |
+|---|---|---|
+| fab A | shuttle broker, cheapest | long lead, fixed dates, no reschedule |
+| fab B | fast, expensive | 4-week faster, 40% dearer, strict quality clause |
+| fab C | old node, forgiving | older process only, generous yield clause |
+| factory A/B/C | box-build · SMT · flex | MOQ vs price vs penalty, one does no rework |
+| pcb A/B/C | 2-layer cheap · 4-layer · quick-turn | MOQ 5/50/500, lead 3/8/15 days |
+
+**The first fab deal is a seat on a shared wafer shuttle** — a MOSIS-style multi-project
+run, historically right for 1990: a few dies for 3,000–8,000, ten to fourteen weeks.
+That is how a nineteen-year-old with 20k gets into silicon without a fab.
+
+**Every contract is one page, generated, and has to be read.** Six to nine clauses drawn
+from a pool, values scaled by supplier personality and seed:
+
+price tiers · MOQ · lead time · NRE/tooling · payment terms (net 15/30/60) ·
+late-delivery penalty · quality clause (max defect rate) · exclusivity (region/term) ·
+volume commitment · price review window · cancellation · rescheduling.
+
+There are **no risk flags**. The number on the sign button is the binding one; whether it
+is a good number is your reading. Later, hiring a contracts lawyer annotates the sheet —
+reading is the early-game mechanic, staff is the late-game convenience. One counter-offer
+per contract, costs a week, may be refused.
+
+Signed contracts live in the drawer's **contracts** screen and bind you: obligations are
+checked every tick, and a miss costs cash and reputation. Brands work the same way —
+a regional PC maker wants 500 keyboards with their badge, at a price that makes you
+do the arithmetic.
+
+### 3b.4 The week — fixed resolution order
+
+Cause must precede effect or the numbers stop being learnable.
+
+| # | Step | Produces |
+|---|---|---|
+| 1 | R&D | RP → project progress |
+| 2 | Fab / rig | wafers or prints started this week land in 6–8 |
+| 3 | Assembly | printed parts + bought parts → finished goods |
+| 4 | Inventory | holding cost, obsolescence clock |
+| 5 | Demand | segment size × share (price, review, brand, rival price) |
+| 6 | Sales | units, revenue, backorders |
+| 7 | Costs | salaries, upkeep, interest, marketing, penalties |
+| 8 | Cash | runway; the number that decides the run |
+| 9 | Rivals | quarterly only — weeks 13/26/39/52 |
+| 10 | Events | seeded or triggered, some with choices |
+| 11 | Log | 0–4 news items, chart appends |
+
+### 3b.5 Defaults, interrupts, speed
+
+- **Routine decisions default.** Ignore pricing and it holds; ignore capacity and last
+  week's plan repeats; a finished project waits in the lab. Ignoring is suboptimal,
+  never fatal.
+- **Events stop the clock.** Recall, takeover offer, yield crisis, contract bid —
+  a modal, a decision, a consequence. 15–25 per decade.
+- **Policies absorb the routine** — target margin, headcount, reinvestment share — so
+  that 16× is honest rather than a blur.
+- Net effect: one real decision every 4–8 game weeks, two to four minutes of play per
+  generation at 4×.
+
+### 3b.6 What this changes
+
+§6's vertical slice currently starts at a fabless CPU designer. It should start at the
+bedroom, run act 0 → gate → shuttle → first fabbed product, and reach CPUs as act 2.
+The slice gets longer but the first ten minutes teach BOM, yield, reviews, runway and
+contract reading instead of dropping the player into a fab they cannot afford.
+
+**Open:** what PIP is; whether events pause or default; whether 2026 is a hard stop.
+
+---
+
 ## 4. Data layer
 
 Everything date-gated. Hard rule: **no component may appear before `earliestYear`**, and the UI shows `Available 2004` instead of hiding it — the research doc calls anachronism the #1 complaint against PC Tycoon 2.
