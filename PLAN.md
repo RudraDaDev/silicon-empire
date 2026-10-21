@@ -251,8 +251,10 @@ the same distance for both.
 
 ### 3b.3 Act 1 — suppliers and contracts
 
-Nine suppliers exist at the gate: **three fabs, three factories, three PCB houses**,
-each with a personality that shows up in the terms rather than in a stat block.
+Twelve suppliers exist at the gate: **three fabs, three factories, three PCB houses**, and
+**three carriers** (fadex, velmo, shipper — the last is a freight consolidator). Each has a
+personality that shows up in the terms rather than in a stat block; the carriers' terms are
+in §3e.2 stage 11.
 
 | House | Personality | Shows up as |
 |---|---|---|
@@ -295,7 +297,7 @@ Cause must precede effect or the numbers stop being learnable.
 | 4 | Inventory | holding cost, obsolescence clock |
 | 5 | Demand | segment size × share (price, review, brand, rival price) |
 | 6 | Sales | units, revenue, backorders |
-| 7 | Costs | salaries, upkeep, interest, marketing, penalties |
+| 7 | Costs | salaries, upkeep, interest, marketing, freight, tariffs, penalties |
 | 8 | Cash | runway; the number that decides the run |
 | 9 | Rivals | quarterly only — weeks 13/26/39/52 |
 | 10 | Events | seeded or triggered, some with choices |
@@ -563,43 +565,57 @@ pick a thing → choose its guts → decide make-or-buy → read the four number
 
 ### 3e.1 The four numbers
 
-Every design decision moves these four, and they are pinned to the sheet at all times.
-Nothing else is shown as a headline, because four is what a player can hold in their head.
+Every design decision moves these four, and they are pinned in the rail for the whole
+wizard. Nothing else is a headline, because four is what a player can hold in their head.
 
 | Number | Means | Comes from |
 |---|---|---|
-| **unit cost** | what one unit costs the day it ships | BOM at *current* yield + contract unit prices (`§3`) |
+| **unit cost** | what one unit costs the day it ships — becomes **landed cost** at stage 11, once freight and tariff are known | BOM at *current* yield + contract unit prices + freight + tariff |
 | **perf** | how it compares to the segment's expectation *this year* | weighted specs vs segment curve — not a raw score |
-| **defect risk** | chance per hundred units of a return, and of a recall-class flaw | underspec vs node maturity, thermal headroom, supplier `maxDefect` |
-| **time to market** | weeks from commit to first sellable unit | tape-out or pcb lead + assembly lead |
+| **defect risk** | chance per hundred units of a return, and of a recall-class flaw | underspec vs node maturity, thermal headroom, supplier `maxDefect`, board score, carrier damage |
+| **time to market** | weeks from release to first sellable unit | tape-out or pcb lead + assembly lead + transit + certification |
 
 The tension between them is the game: perf costs unit cost, unit cost buys demand, defect
 risk is where cheap becomes expensive, and time to market is where perfection becomes
 irrelevant.
 
-### 3e.2 The wizard — nine stages, one screen
+**Margin is the fifth number, and it only appears at stage 12**, because until you pick a
+price there is no margin to show — and showing an estimate earlier would let the player
+tune the design to a number they have not chosen yet.
 
-A single left-to-right flow with **the four numbers pinned in a sticky rail** for the whole
-of it. Nothing is spent and nothing locks until the last stage, so a player can walk
-backwards as far as they like.
+### 3e.2 The wizard — twelve stages, one screen
+
+One flow, left to right. **Nothing is spent and nothing locks until stage 9.** Stages
+10–12 are launch configuration: the product exists and is being built, but it is not on
+sale until it has a place, a carrier and a price.
 
 | # | Stage | What the player does | What it moves |
 |---|---|---|---|
 | 1 | **product selection** | pick the catalogue row. Era-gated, and an unavailable row says why (`needs 16-bit core · research 1993`) instead of vanishing | — |
-| 2 | **name & series** | name the model and file it under a series | brand, series equity |
-| 3 | **components** | every input, **stacked vertically and grouped by its own category** — one scroll, not one stage per part | unit cost, perf, defect risk |
-| 4 | **supplier contracts** | attach a signed fab / factory / pcb contract to the inputs that need one | unit cost, lead time, defect ceiling |
-| 5 | **pcb puzzle** | lay the parts out and route them | board cost, defect risk, size |
-| 6 | **enclosure** | material, finish, volume, wall thickness | cost, thermal, perceived quality |
-| 7 | **features** | toggles — backlight, wireless, hot-swap, rgb, extras | BOM, appeal, defect risk |
-| 8 | **intended use** | who it is for: segment and channel | which expectations the review grades against |
-| 9 | **datasheet** | the sheet writes itself from your choices; add up to three lines of flourish | attention, expectations |
+| 2 | **name & series** | name the model, file it under a series | brand, series equity |
+| 3 | **components** | every input, **stacked vertically and grouped by its own category** — one scroll, not a stage per part. Contracts attach here | unit cost, perf, defect risk |
+| 4 | **pcb puzzle** | lay the parts out and route them | board cost, defect risk, size |
+| 5 | **enclosure** | material, finish, volume, wall thickness | cost, thermal, perceived quality |
+| 6 | **features** | toggles — backlight, wireless, hot-swap, extras | BOM, appeal, defect risk |
+| 7 | **intended use** | who it is for: segment and channel | which expectations the review grades against |
+| 8 | **datasheet** | the sheet writes itself; add up to three lines of flourish | attention, expectations |
+| 9 | **release** | **the irreversible act** — tooling and NRE are spent, the sheet locks, production starts, the clock runs | cash, ramp clock |
+| 10 | **release place** | which territories: home first, others as they unlock. Certification per place costs money and weeks | tariff, demand size, review strictness |
+| 11 | **shipping** | pick a carrier per place | landed cost, transit, damage rate |
+| 12 | **price** | the slider, now against **landed** cost, with margin and the demand curve under it | margin, orders |
 
-**Stage 3 is the important one.** Components are not a sequence of screens — that would be
-twenty stages for a phone. They are **categories, each a section of one scroll**:
+**Why the tail is ordered this way.** It is not a form — it is a ramp. Release starts
+production; the first units are still weeks away. Stages 10–12 are what you do *while the
+line is running*, and there is a real cost to dawdling: units accumulate in a warehouse
+with nowhere to go. The wizard can be closed and resumed between 9 and 12, which is
+exactly what a player at 16× will do.
+
+**Stage 3 is where the design is won or lost.** Components are not a sequence of screens —
+that would be twenty stages for a phone. They are **categories, each a section of one
+scroll**:
 
 ```
-compute     mcu ................. [ yours ] [ contract ] [ spot ]
+compute     mcu ................. [ yours ] [ fab b ✓ ] [ spot ]
             memory .............. [ 512 kb ] [ 1 mb ▲ ]
 power       battery ............. [ none ] [ aaa ] [ coin ]
 io          switches ............ [ membrane ] [ mechanical ✓]
@@ -607,50 +623,65 @@ io          switches ............ [ membrane ] [ mechanical ✓]
 mechanical  case ................ [ printed ✓ ] [ bought ]
 ```
 
-Each row: the part, the options, a source chip (yours / a contract / spot price), and its
-live effect on the four numbers. A category with nothing in it collapses to one line. The
-whole step is scannable in a couple of seconds because it is a *list of parts*, not a game
-of its own.
+Each row: the part, the options, a source chip, and its live effect on the four numbers.
+A category with nothing in it collapses to one line.
 
-**Stage 4 is where contracts earn their place.** A contract is not a screen — it is a
-*slot on a component row*. If you have signed `fab b`, the mcu row offers it, and attaching
-it swaps the spot price for the contracted price and lead time:
+**Contracts live on rows, not on a screen.** A contract is a *source chip*. If you have
+signed `fab b`, the mcu row offers it, and attaching it swaps spot for contracted:
 
 ```
 mcu    spot $4.20 · 2 wk   │  fab b contract $3.30 · 9 wk   ✓ attached
 ```
 
-The trade is visible and it is the whole point of act 1: cheaper per unit, longer to wait.
-A design can mix sources — contract memory, spot everything else — and the lead time of a
-product is the **maximum** across its inputs, not the sum.
+Cheaper per unit, longer to wait. The three contract kinds attach to different rows —
+**fab** to dies, **factory** to assembly, **pcb** to the board — so a single product can
+carry three separate deals, and its lead time is the **maximum** across inputs, not the
+sum.
 
-**Stage 5, the pcb puzzle.** A small deterministic grid puzzle, thirty to ninety seconds,
-never more:
+**Stage 5, the pcb puzzle.** Deterministic, thirty to ninety seconds:
 
-- place the parts you selected onto a board (the grid scales with the product: 8×6 for a
-  keyboard, 12×8 for a device, more later);
-- route the connections. Crossings are violations; long traces cost signal integrity;
-- constraints that make it a puzzle rather than decoration: **board area** (cost), **layer
-  count** (2 = cheap and hard, 4 = dear and easy), **heat** (power parts away from
-  thermally sensitive ones), **connector reach** (ports must touch an edge);
-- the result is a **score** that feeds defect risk — a clean board is worth a few points of
-  review, a crossed one is worth a return rate;
-- an **auto-route** button exists and costs money: a mediocre legal layout, for players who
-  do not want the puzzle. It is never as good as a careful board, and that is the reward
-  for doing it by hand.
+- place the parts you selected onto a grid (8×6 for a keyboard, 12×8 for a device);
+- route the connections — crossings are violations, long traces cost signal integrity;
+- four constraints make it a puzzle rather than decoration: **board area** (cost),
+  **layer count** (2 = cheap and hard, 4 = dear and easy), **heat** (power parts away from
+  sensitive ones), **connector reach** (ports must touch an edge);
+- the result scores into defect risk — a clean board is worth a few review points, a
+  crossed one is a return rate;
+- **auto-route** exists, costs money, and is never as good as a careful board.
 
-The puzzle is deterministic from the placed parts, so the same design always yields the
-same board and a save round-trip is stable.
+Same parts, same board, every time — so a save round-trip is stable.
 
-**Stage 9, the datasheet.** Generated from the design, in plausible spec-sheet language —
-`5 V ±5%`, `pin 3: ground`, `adapter: usb-a to ps/2`, `rated 20 ma`, `operating 0–40 °C`.
-The player may add up to three lines of flourish from a generated vocabulary or typed
-freely. Flourish is a **claim**, lightly scored: it buys a little attention at launch and,
-if it oversells what the sheet actually says, costs a little review. It can never be
-false — the vocabulary is drawn from things the design can actually claim.
+**Stage 8, the datasheet.** Generated in spec-sheet language — `5 V ±5%`, `pin 3: ground`,
+`adapter: usb-a to ps/2`, `rated 20 ma`, `operating 0–40 °C` — plus up to three lines of
+flourish the player writes or picks. Flourish is a **claim**: it buys attention at launch
+and costs review if it oversells what the sheet actually says. It can never be false,
+because the vocabulary only offers things this design can claim.
 
-**The datasheet is also the commit page.** It is the last thing you see before the tooling
-is spent, and it is the only stage where the button says *release* rather than *next*.
+**Stage 9, release.** The only stage whose button does not say *next*. It spends the
+tooling or NRE, locks every earlier stage, and starts the ramp clock.
+
+**Stage 10, release place.** Home market first and cheap. Others unlock by year and cost
+real money and weeks to certify — the model for the 1990s is a home territory plus
+two or three export markets, not a global launch. Each place carries a tariff, a demand
+multiplier, and its own strictness of expectation; a product that reviews well at home can
+review poorly where the comparable is better.
+
+**Stage 11, shipping.** Three fictional carriers, same shape as the fab/factory/pcb houses
+— personality expressed in the numbers, never in a stat block:
+
+| Carrier | Cost / unit | Transit | Damage | Note |
+|---|---|---|---|---|
+| **fadex** | high | 2–4 days | very low | tracking on every parcel; the default for a launch window |
+| **velmo** | low | 10–18 days | spikes on fragile goods | fine for a cheap line, painful in december |
+| **shipper** | lowest | 5–9 weeks | low | freight consolidator, minimum 200 units, per-pallet |
+| *post* | pennies | 3–10 days | high, untracked | act 0 only — you walk to the counter |
+
+Damage lands in defect escapes, so a cheap carrier quietly costs reviews. Transit is part
+of time to market and part of the lead time between a price change and its effect.
+
+**Stage 12, price.** Against landed cost now, with the demand curve drawn under the
+slider and margin on the rail. A product left unpriced after release accrues inventory and
+earns nothing — the desk says so rather than letting it drift.
 
 ### 3e.3 Series
 
@@ -659,40 +690,49 @@ existing series carries its reviews forward at a fraction, which is why a good s
 worth more than a good product. It also constrains: one series holds at most four live
 models, and a retired series decays.
 
-### 3e.4 After commit
+### 3e.4 After release
 
-Ramp, launch, harvest, refresh, retire — unchanged from the loop in §3b:
-
-5. **Ramp.** Yield starts low and climbs with cumulative units made (a learning curve, not
+4. **Ramp.** Yield starts low and climbs with cumulative units made (a learning curve, not
    a switch). A new node starts worse. The ramp is why the first thousand units are
-   expensive and the ten-thousandth is not.
-6. **Launch.** Reviews are computed from weighted components — **all shown**: perf vs
-   segment, defects escaped, price vs nearest alternative, delivery speed.
-7. **Harvest.** Price is a live slider with the demand curve drawn under it. Volume splits
-   by the sell-or-consume ratio (§4a): sold units earn cash and arm rivals; consumed units
-   make your own products cheaper.
-8. **Refresh or retire.** A refresh is the same product with one variant bumped — half the
-   tooling, half the time, resets the review decay. A retire stops support cost and frees
-   the name.
+   expensive and the ten-thousandth is not — and it is why stages 10–12 have slack in them.
+5. **Launch.** When the first priced unit is sellable, the review is computed from weighted
+   components — **all shown**: perf vs segment, defects escaped, price vs nearest
+   alternative, delivery speed. Per-place: the same product grades differently in two
+   territories.
+6. **Harvest.** Price is a live slider per place, with the demand curve under it. Volume
+   splits by the sell-or-consume ratio (§4a): sold units earn cash and arm rivals; consumed
+   units make your own products cheaper. Switching carrier mid-life is allowed and has a
+   week of transition where transit doubles.
+7. **Refresh or retire.** A refresh is the same product with one variant bumped — half the
+   tooling, half the time, resets the review decay. A retire stops support cost, frees the
+   name, and — if it is still listed — takes four weeks to run out of stock.
 
 ### 3e.5 What a design costs, by act
 
 | | Act 0 (rig) | Act 1 (suppliers) | Act 2+ (silicon) |
 |---|---|---|---|
-| To commit | nothing — the rig prints this week | pcb tooling 200–2,000 | NRE + shuttle seat 3,000–8,000 |
+| To release | nothing — the rig prints this week | pcb tooling 200–2,000 | NRE + shuttle seat 3,000–8,000 |
 | Time to first unit | 1 week | 3–8 weeks | 12–16 weeks |
-| What can go wrong | scrap (12%/print) | supplier miss, MOQ trap | yield, mask respin, defect escape |
+| Certification | none, home only | 400–1,500 per export market | 2,000–15,000 per market |
+| Carrier | post | fadex / velmo / shipper | all three, per place |
+| What can go wrong | scrap (12%/print), post loses parcels | supplier miss, MOQ trap, certification delay | yield, mask respin, defect escape, tariff |
 
 A **mask respin** (a defect found in the first silicon) is deliberately the most expensive
 mistake in the game: it costs the NRE again and four months. Prototyping before committing
 is the mitigation, and prototyping costs a week and 5% of the NRE — cheap enough to be
 worth doing, expensive enough to skip when you are in a hurry.
 
+**Exporting is what makes stage 10 expensive.** Home is nearly free; the second market is a
+month of paperwork and a few hundred; the fourth is a lawyer and a testing house. That
+keeps the 1990s feeling small — one market until you can afford two — without ever banning
+a territory.
+
 ### 3e.6 Designs are assets
 
-A committed design is stored as a board row: specs, BOM decisions, yield curve position,
-review history, units sold, cumulative profit (which is what the desk chart plots per
-product). It survives refreshes. It can be **re-spun** onto a newer node later at reduced
+A released design is stored as a board row: specs, BOM and contract decisions, board
+score, enclosure and features, **places, carrier per place, price per place**, yield curve
+position, review history per place, units sold, cumulative profit (which is what the desk
+chart plots per product). It survives refreshes. It can be **re-spun** onto a newer node later at reduced
 NRE — the cheapest way to keep an old product alive, and usually a mistake for the same
 reason it is cheap.
 
@@ -702,30 +742,29 @@ product forever.
 
 ### 3e.7 Act 0's version of the loop
 
-Deliberately thin: the same nine stages, with five of them empty because nothing is
-irrevocable yet.
+Deliberately thin: the same twelve stages, with half of them one field or empty.
 
 ```
-1 product    keyboard | mouse | keycaps | case
-2 name       one field, and "series" is just the model family name
-3 components case ✓ printed · switches · cable · mcu · pcb
-4 contracts  none — you have no suppliers yet
-5 pcb puzzle 4x3 grid, three parts. exists from the first keyboard, because it is
-             the part of the loop that is fun and it should not be a late reward
-6 enclosure  printed: shape, wall thickness, profile
-7 features   backlight (no), wireless (no — not until 1994)
-8 intended    home office | bedroom | gift
-9 datasheet  auto, plus one line of flourish
-→ print this week, assemble this week, list it
+1  product    keyboard | mouse | keycaps | case
+2  name       one field; "series" is the model family name
+3  components case ✓ printed · switches · cable · mcu · pcb   (no contracts yet)
+4  pcb puzzle 4x3, three parts — fifteen seconds, winnable by luck
+5  enclosure  printed: shape, wall thickness, profile
+6  features   backlight (no), wireless (no — not until 1994)
+7  intended   home office | bedroom | gift
+8  datasheet  auto, plus one line of flourish
+9  release    the rig starts printing this week; no tooling to spend
+10 place      home market only — the export question has not been invented yet
+11 shipping   post, or "hand it over at the fair". damage is real, tracking is not
+12 price      your only real lever, and the one the act is teaching
 ```
 
-No tooling, no ramp, no respin — the four numbers are all it has, and all four already
-matter. The act teaches the sheet before anything is irrevocable, and it teaches the
-puzzle while the stakes are a day's resin.
+No tooling, no ramp, no respin. The four numbers are all it has, and all four already
+matter. The act teaches the sheet while nothing is irrevocable, and teaches the puzzle
+while the stakes are a day's resin.
 
-The **pcb puzzle in act 0 is 4×3 with three parts**, which takes about fifteen seconds and
-is winnable by luck. By act 1 it is 8×6; by act 2, 12×8 with layer pressure. That
-progression is the tutorial for a single mechanic rather than a new mechanic per act.
+The **pcb puzzle in act 0 is 4×3 with three parts**; act 1 is 8×6; act 2 is 12×8 with
+layer pressure. One mechanic taught by growing it rather than a new one per act.
 
 **Open:** whether prototypes are in the M1 slice or act 0 only; how many refresh cycles
 before a product's demand curve is dead regardless of review.
