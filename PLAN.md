@@ -550,6 +550,109 @@ cycle, corporate, positive.
 
 ---
 
+## 3e. Product design loop
+
+The generation loop of §3b in detail. One screen serves all 175 products because the
+designer is generated from the catalogue's `specs` — a new category gets a working design
+sheet for free (`§4a`).
+
+```
+pick a thing → choose its guts → decide make-or-buy → read the four numbers
+   → commit (tooling + weeks) → ramp → launch → harvest → retire
+```
+
+### 3e.1 The four numbers
+
+Every design decision moves these four, and they are pinned to the sheet at all times.
+Nothing else is shown as a headline, because four is what a player can hold in their head.
+
+| Number | Means | Comes from |
+|---|---|---|
+| **unit cost** | what one unit costs the day it ships | BOM at *current* yield + contract unit prices (`§3`) |
+| **perf** | how it compares to the segment's expectation *this year* | weighted specs vs segment curve — not a raw score |
+| **defect risk** | chance per hundred units of a return, and of a recall-class flaw | underspec vs node maturity, thermal headroom, supplier `maxDefect` |
+| **time to market** | weeks from commit to first sellable unit | tape-out or pcb lead + assembly lead |
+
+The tension between them is the game: perf costs unit cost, unit cost buys demand, defect
+risk is where cheap becomes expensive, and time to market is where perfection becomes
+irrelevant.
+
+### 3e.2 The steps
+
+1. **Pick the product.** Catalogue row, filtered by era. Gated by `year` and by the
+   player's capability; the row shows *why* it is unavailable rather than hiding.
+2. **Choose the guts.** Every `spec` is a control. A gated level is shown **locked with
+   its unlock reason** — `16-bit core · research 1993` — never hidden (§4a rule).
+   Numeric specs are sliders with a cost curve drawn on them, so "bigger" is visibly
+   more expensive as you drag.
+3. **Make or buy, per input.** `contains[]` is a list, and every child is a decision:
+   *buy at market* (cash now, reliable), *make it yourself* (cheaper per unit at volume,
+   capex and a second yield curve to manage), or *use something you already make*. This
+   is the single richest strategic axis in the game and it exists from act 0 — where the
+   printer makes the case and everything else is bought.
+4. **Read the four numbers, then commit.** Committing is the irreversible act: tooling or
+   NRE is spent, the clock starts, and the sheet locks. Everything before this point is
+   free to change.
+5. **Ramp.** Yield starts low and climbs with cumulative units made (a learning curve, not
+   a switch). A new node starts worse. The ramp is why the first thousand units are
+   expensive and the ten-thousandth is not.
+6. **Launch.** Reviews are computed from weighted components — **all shown** (R: never one
+   opaque number): perf vs segment, defects escaped, price vs nearest alternative,
+   delivery speed. The review is the marketing you cannot buy in act 0.
+7. **Harvest.** Price is a live slider with the demand curve drawn under it. Volume is
+   split by the sell-or-consume ratio (§4a): sold units earn cash and arm rivals; consumed
+   units make your own products cheaper. Both endpoints are legal strategies.
+8. **Refresh or retire.** A *refresh* is the same product with one variant bumped — half
+   the tooling, half the time, resets the review decay. A *retire* stops support cost and
+   frees the name. The decision at the back half of a generation is usually "refresh once,
+   then let it die", and getting that wrong is how you end up supporting three products
+   that sell nothing.
+
+### 3e.3 What a design costs, by act
+
+| | Act 0 (rig) | Act 1 (suppliers) | Act 2+ (silicon) |
+|---|---|---|---|
+| To commit | nothing — the rig prints this week | pcb tooling 200–2,000 | NRE + shuttle seat 3,000–8,000 |
+| Time to first unit | 1 week | 3–8 weeks | 12–16 weeks |
+| What can go wrong | scrap (12%/print) | supplier miss, MOQ trap | yield, mask respin, defect escape |
+
+A **mask respin** (a defect found in the first silicon) is deliberately the most expensive
+mistake in the game: it costs the NRE again and four months. Prototyping before committing
+is the mitigation, and prototyping costs a week and 5% of the NRE — cheap enough to be
+worth doing, expensive enough to skip when you are in a hurry.
+
+### 3e.4 Designs are assets
+
+A committed design is stored as a board row: specs, BOM decisions, yield curve position,
+review history, units sold, cumulative profit (which is what the desk chart plots per
+product). It survives refreshes. It can be **re-spun** onto a newer node later at reduced
+NRE — the cheapest way to keep an old product alive, and usually a mistake for the same
+reason it is cheap.
+
+**Reverse engineering:** a design you have shipped for 26 weeks can be cloned by a rival
+of sufficient size, at a cost to them. This is the counterweight to sitting on one good
+product forever.
+
+### 3e.5 Act 0's version of the loop
+
+Deliberately thin, so the whole loop fits in one screen and one sitting:
+
+```
+pick keyboard | mouse | keycaps | case
+  → choose geometry (printed: case shape, keycap profile)
+  → choose bought parts (switch type, cable, mcu, pcb) from a list with prices
+  → price it
+  → print this week, assemble this week, list it
+```
+
+No tooling, no ramp, no respin — the four numbers are all it has, and all four already
+matter. The act teaches the sheet before anything is irrevocable.
+
+**Open:** whether prototypes are in the M1 slice or act 0 only; how many refresh cycles
+before a product's demand curve is dead regardless of review.
+
+---
+
 ## 4. Data layer
 
 Everything date-gated. Hard rule: **no component may appear before `earliestYear`**, and the UI shows `Available 2004` instead of hiding it — the research doc calls anachronism the #1 complaint against PC Tycoon 2.
@@ -881,7 +984,7 @@ Keyboard reachability for every control, visible focus ring, `prefers-reduced-mo
 **One playable decade: January 1990 → December 2001.** CPU design only, one product line, six rivals, real dated events.
 
 In scope:
-1. **Design** a CPU: die area, cache, clock, pipeline depth, node choice. Live perf + BOM + thermal estimate. (Designer UI generated from the category schema, so the next category needs no new screen.)
+1. **Design** a CPU: die area, cache, clock, pipeline depth, node choice. Live perf + BOM + thermal estimate. (Designer UI generated from the category schema, so the next category needs no new screen — loop in §3e.)
 2. **Fab**: buy capacity or own one fab; yield ramps with node age; launches on a new node hurt.
 3. **Price**: slider with live demand curve and margin readout.
 4. **Launch**: review with a visible 4-part breakdown.
