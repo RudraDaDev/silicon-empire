@@ -33,7 +33,7 @@ Research the core, and 16-bit lights up *inside the same product*. Your designs 
 | A5 | Rare-earth feedstock | grade, oxide mix | 1990 | commodity |
 | A6 | 🔒 Process node | feature size, lithography class | 1990 | — (sold as G4) |
 
-## B · Silicon · 30
+## B · Silicon · 35
 
 | ID | Product | Variant axis | Era | Sells to |
 |---|---|---|---|---|
@@ -80,7 +80,7 @@ Research the core, and 16-bit lights up *inside the same product*. Your designs 
 | C1 | Packaging service | **package type** QFP/BGA/flip-chip/PoP/TSV, pin count | 1990 | B2B |
 | C2 | Test & binning service | coverage, bins, throughput | 1990 | B2B |
 
-## D · Modules & components · 52
+## D · Modules & components · 61
 
 | ID | Product | Variant axis | Era | Sells to |
 |---|---|---|---|---|
@@ -146,7 +146,7 @@ Research the core, and 16-bit lights up *inside the same product*. Your designs 
 | D60 | PCB | layers, size, material, finish | 1990 | B2B |
 | D61 | PCBA assembly service | SMT class, component count, yield | 1990 | B2B |
 
-## E · Devices · 48
+## E · Devices · 49
 
 | ID | Product | Variant axis | Era | Sells to |
 |---|---|---|---|---|
