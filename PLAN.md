@@ -306,8 +306,9 @@ Cause must precede effect or the numbers stop being learnable.
 - **Routine decisions default.** Ignore pricing and it holds; ignore capacity and last
   week's plan repeats; a finished project waits in the lab. Ignoring is suboptimal,
   never fatal.
-- **Events stop the clock.** Recall, takeover offer, yield crisis, contract bid —
-  a modal, a decision, a consequence. 15–25 per decade.
+- **Decisions stop the clock; notices never do.** Recall, takeover offer, yield crisis,
+  contract bid — a modal, a decision, a consequence. 15–25 per decade. The full pause
+  table is in §3d.2.
 - **Policies absorb the routine** — target margin, headcount, reinvestment share — so
   that 16× is honest rather than a blur.
 - Net effect: one real decision every 4–8 game weeks, two to four minutes of play per
@@ -342,7 +343,7 @@ bedroom, run act 0 → gate → shuttle → first fabbed product, and reach CPUs
 The slice gets longer but the first ten minutes teach BOM, yield, reviews, runway and
 contract reading instead of dropping the player into a fab they cannot afford.
 
-**Open:** whether events pause or default.
+**Open:** nothing on events — see §3d for the sources and the pause table.
 
 ---
 
@@ -470,6 +471,82 @@ within a tick, change across ticks, and that an unread sheet never leaks its num
 
 **Still to come:** the panel UI (`src/ui/pip/panel.js`) — transcript, suggested
 questions, track record. The adapter is engine-complete without it.
+
+---
+
+## 3d. Events — real history for real-analogue firms, procedural for fictional
+
+Two sources, one rule: **an event's source is decided by who it happens to.**
+
+| Who | Source | Because |
+|---|---|---|
+| a real-analogue brand (Imtel, AMB, Nivida, Pomelo, Snapmo) | **dated history** — authored, year-pinned, from the research bible | the real thing happened; inventing a different fate for a thinly-veiled Intel is worse than borrowing the true one |
+| a fictional brand (Voltaic Works, and any `gate.year > 2026`) | **procedural** — rolled from `rng` against its personality | there is no history to be faithful to, so a generator can be as nasty as its dice allow |
+| the player's company | **procedural** | same reason |
+| a *market-wide* event (DRAM price, a flood, a rate move) | **dated history** when dated, procedural otherwise | it hits everyone, so it must be authored once and shared |
+
+**Nothing crosses over.** A fictional firm cannot be handed the FDIV bug; Imtel cannot be
+given a procedurally generated lawsuit. This is enforced by data, not by taste:
+`source: 'history'` events must name a brand whose roster row is `real-analogue` and carry
+a `year` the roster's `gate.year` allows; `source: 'procedural'` events may only draw from
+brands marked `fictional` or from the player. `tools/lint-events.mjs` fails the build on
+any event that breaks the pairing.
+
+**After 2026 everything is procedural.** The research boundary is the end of authored
+history, so 2027–2055 has no dated pool — market-wide events there are rolled from a
+plausible set rather than referenced.
+
+### 3d.1 Three shapes
+
+| Shape | Needs the player? | Examples | Where it goes |
+|---|---|---|---|
+| **Notice** | no | imtel ships a 486; a rival cuts price; DRAM firms; a magazine reviews your keyboard; lead times extend | news grid, next tick |
+| **Decision** | yes, 2–3 choices | a recall notice on *your* batch; a brand offers 500 units OEM; a yield crisis on a new node; a takeover approach; a 48-hour bid; resin held at customs | modal |
+| **Interrupt** (act 0) | yes, small stakes | the rig jams; a fair wants 20 units by friday; a defect return; a custom-order request | modal, brief |
+
+Notices are what the desk's fixed four-card news grid already shows — `market`, `launch`,
+`scandal`, `supply`, `presentation` map to those instances.
+
+### 3d.2 The pause rule
+
+| | 1× | 4× | 16× |
+|---|---|---|---|
+| Notice | no pause | no pause | no pause |
+| Decision | pauses | pauses | **queues** — banner + count, waits indefinitely |
+| Interrupt | pauses | pauses | queues |
+| Game over / gate | pauses | pauses | pauses |
+
+Fast-forward must never silently eat a choice, and a player at 16× must never be trapped
+in a modal every thirty seconds. The queue is the compromise: the clock keeps running, the
+decision waits, and the banner says how many are waiting.
+
+### 3d.3 Data shape
+
+```js
+{
+  id: 'fdiv-1994',
+  source: 'history',            // 'history' | 'procedural'
+  year: 1994, week: 43,         // history only; procedural uses weighted triggers
+  shape: 'decision',            // 'notice' | 'decision' | 'interrupt'
+  actor: 'imtel',               // roster id
+  requires: { segment: 'cpu', minShare: 0 },   // trigger conditions
+  chains: 'fdiv-1994-lawsuit',  // cascades: FDIV -> lawsuit -> stock hit -> layoffs
+  choices: [
+    { label: 'recall', cash: -0.08, narrative: -6, reputation: +8 },
+    { label: 'deny it', cash: 0, reputation: -22, andThen: 'fdiv-1994-lawsuit' },
+  ],
+  text: 'floating-point bug found in the fpu. a teacher found it with a spreadsheet.'
+}
+```
+
+Procedural events take the same shape with `source: 'procedural'` and no `year`: they are
+drawn when their trigger fires, and their actor is a fictional brand or the player.
+
+**Counts:** ~120 authored history events for 1990–2026 (25 in the M1 slice), plus ~80
+procedural templates across the seven categories — market, supply, scandal, geopolitical,
+cycle, corporate, positive.
+
+
 
 ---
 
