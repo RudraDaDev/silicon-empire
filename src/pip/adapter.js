@@ -108,16 +108,22 @@ const money = (n) => (n >= 1e6 ? `$${(n / 1e6).toFixed(2)}m`
   : n >= 10 ? `$${Math.round(n)}` : `$${n.toFixed(2)}`);
 const pct = (n) => `${Math.round(n * 100)}%`;
 
-/** Contracts carry their clauses as data, so nothing here needs to parse prose. */
+/** Contracts carry their clauses as data — either flat or under `terms`. */
+const termsOf = (c) => c.terms ?? c;
+
 function clauseLine(c) {
-  if (!c) return null;
+  const t = termsOf(c);
   const bits = [];
-  if (c.unitPrice != null) bits.push(`${money(c.unitPrice)}/unit`);
-  if (c.moq != null) bits.push(`moq ${c.moq}`);
-  if (c.leadDays != null) bits.push(`${c.leadDays} days`);
-  if (c.paymentDays != null) bits.push(`net ${c.paymentDays}`);
-  if (c.latePenalty != null) bits.push(`${pct(c.latePenalty)}/week late`);
-  if (c.maxDefect != null) bits.push(`max ${pct(c.maxDefect)} defects`);
+  if (t.unitPrice != null) bits.push(`${money(t.unitPrice)}/unit`);
+  else if (t.rate != null) bits.push(`${money(t.rate)}/parcel`);
+  if (t.moq != null) bits.push(`moq ${t.moq}`);
+  else if (t.minUnits != null) bits.push(`min ${t.minUnits}`);
+  if (t.leadDays != null) bits.push(`${t.leadDays} days`);
+  else if (t.transit != null) bits.push(`${t.transit} day transit`);
+  if (t.paymentDays != null) bits.push(`net ${t.paymentDays}`);
+  if (t.latePenalty != null) bits.push(`${pct(t.latePenalty)}/week late`);
+  if (t.maxDefect != null) bits.push(`max ${pct(t.maxDefect)} defects`);
+  if (t.damage != null) bits.push(`${pct(t.damage)} damaged`);
   return bits.join(' · ');
 }
 
@@ -128,37 +134,55 @@ const MEANING = {
   latePenalty: 'what a late delivery costs them — check it is actually enforced',
   maxDefect: 'the defect rate they promise, and your only lever when a batch is bad',
   nre: 'a one-off tooling charge, paid whether or not you sell a single unit',
-  exclusivity: 'a promise not to sell this elsewhere — it narrows your options later',
+  exclusive: 'a promise not to sell this elsewhere — it narrows your options later',
 };
 
-const fmtContract = (c) => `${c.house} ${c.kind}`;
+const fmtContract = (c) => c.name ?? `${c.house} ${c.kind}`;
+const contractKey = (c) => `${c.house} ${c.kind ?? ''}`.trim();
+
+/** Find a contract by the name the player typed, falling back to house+letter. */
+function findContract(all, name) {
+  const n = String(name || '').toLowerCase();
+  if (!n) return null;
+  return all.find((c) => String(c.name || '').toLowerCase() === n)
+    ?? all.find((c) => String(c.name || '').toLowerCase().startsWith(n))
+    ?? all.find((c) => contractKey(c).startsWith(n))
+    ?? null;
+}
 
 function summaryOf(c) {
+  const t = termsOf(c);
   const lines = [`${fmtContract(c)} — ${clauseLine(c)}`];
-  if (c.moq != null) lines.push(`moq means ${MEANING.moq}.`);
-  if (c.paymentDays != null && c.paymentDays >= 60) lines.push(`net ${c.paymentDays} is generous on paper; it only helps if they actually pay on time.`);
-  if (c.nre != null) lines.push(`there is ${money(c.nre)} of nre on top of the unit price.`);
+  if (t.moq != null) lines.push(`moq means ${MEANING.moq}.`);
+  if (t.paymentDays != null && t.paymentDays >= 60) lines.push(`net ${t.paymentDays} is generous on paper; it only helps if they actually pay on time.`);
+  if (t.nre != null) lines.push(`there is ${money(t.nre)} of nre on top of the unit price.`);
+  if (t.leadDays != null && t.leadDays >= 70) lines.push(`${t.leadDays} days is a long lead — order before you need it, not when you need it.`);
   if (c.exclusive) lines.push('there is an exclusivity clause.');
   return lines;
 }
 
 function compareOf(a, b) {
-  const out = [`${fmtContract(a)} vs ${fmtContract(b)}:`];
+  const ta = termsOf(a);
+  const tb = termsOf(b);
   const A = fmtContract(a);
   const B = fmtContract(b);
+  const out = [`${A} vs ${B}:`];
   const row = (label, av, bv, better, fmt) => {
     if (av == null || bv == null || av === bv) return;
     const winner = (better === 'lower' ? av < bv : av > bv) ? A : B;
     out.push(`${label}: ${winner} — ${fmt(Math.abs(av - bv))}.`);
   };
-  row('unit price', a.unitPrice, b.unitPrice, 'lower', (d) => `${money(d)} cheaper per unit`);
-  row('lead time', a.leadDays, b.leadDays, 'lower', (d) => `${d} days faster`);
-  row('moq', a.moq, b.moq, 'lower', (d) => `${d} units smaller`);
-  row('payment terms', a.paymentDays, b.paymentDays, 'higher', (d) => `${d} days longer to pay`);
-  row('late penalty', a.latePenalty, b.latePenalty, 'higher', (d) => `${pct(d)} a week stronger`);
+  row('unit price', ta.unitPrice, tb.unitPrice, 'lower', (d) => `${money(d)} cheaper per unit`);
+  row('rate', ta.rate, tb.rate, 'lower', (d) => `${money(d)} cheaper per parcel`);
+  row('lead time', ta.leadDays, tb.leadDays, 'lower', (d) => `${d} days faster`);
+  row('transit', ta.transit, tb.transit, 'lower', (d) => `${d} days faster`);
+  row('moq', ta.moq, tb.moq, 'lower', (d) => `${d} units smaller`);
+  row('payment terms', ta.paymentDays, tb.paymentDays, 'higher', (d) => `${d} days longer to pay`);
+  row('late penalty', ta.latePenalty, tb.latePenalty, 'higher', (d) => `${pct(d)} a week stronger`);
+  row('damage rate', ta.damage, tb.damage, 'lower', (d) => `${pct(d)} less breakage`);
   if (a.exclusive !== b.exclusive) out.push(`${a.exclusive ? A : B} wants exclusivity; the other does not.`);
-  if (a.nre != null && b.nre != null && a.nre !== b.nre) {
-    out.push(`tooling: ${a.nre < b.nre ? A : B} — ${money(Math.abs(a.nre - b.nre))} cheaper up front.`);
+  if (ta.nre != null && tb.nre != null && ta.nre !== tb.nre) {
+    out.push(`tooling: ${ta.nre < tb.nre ? A : B} — ${money(Math.abs(ta.nre - tb.nre))} cheaper up front.`);
   }
   if (out.length === 1) out.push('on the numbers i can see, they are the same sheet.');
   return out;
@@ -328,9 +352,12 @@ export function createPip({ engine, seed = 1990, world = () => ({}) } = {}) {
     const read = ctx.contracts.filter((c) => c.read);
 
     if (cl.wantsCompare) {
-      const picked = cl.names.length >= 2
-        ? cl.names.map((n) => ctx.contracts.find((c) => `${c.house} ${c.kind}`.startsWith(n) && c.read)).filter(Boolean)
-        : read.slice(0, 2);
+      const mentioned = (cl.mentioned || []).filter((c) => c.read);
+      const picked = mentioned.length >= 2
+        ? mentioned.slice(0, 2)
+        : cl.names.length >= 2
+          ? cl.names.map((n) => findContract(ctx.contracts, n)).filter((c) => c && c.read)
+          : read.slice(0, 2);
       if (picked.length < 2) {
         return {
           kind: 'refuse',
@@ -342,7 +369,7 @@ export function createPip({ engine, seed = 1990, world = () => ({}) } = {}) {
       return { kind: 'compare', text: compareOf(picked[0], picked[1]).join('\n'), basis: 'the sheets you have read', refs: ['contracts'] };
     }
 
-    const named = cl.names.length ? ctx.contracts.find((c) => `${c.house} ${c.kind}`.startsWith(cl.names[0])) : null;
+    const named = (cl.mentioned || [])[0] ?? (cl.names.length ? findContract(ctx.contracts, cl.names[0]) : null);
     if (named && !named.read) {
       return {
         kind: 'refuse',
@@ -392,6 +419,10 @@ export function createPip({ engine, seed = 1990, world = () => ({}) } = {}) {
 
     const full = { ...ctx, world: w, tick };
 
+    // a house named in the sentence is a contract question, even without the word
+    const lower = String(text || '').toLowerCase();
+    cl.mentioned = (ctx.contracts ?? []).filter((c) => c.name && lower.includes(String(c.name).toLowerCase()));
+
     if (cl.wantsAction) {
       return {
         kind: 'refuse',
@@ -404,7 +435,10 @@ export function createPip({ engine, seed = 1990, world = () => ({}) } = {}) {
       };
     }
 
-    if (cl.topic === 'contract' || (cl.wantsSummary && cl.topic === 'contract') || (cl.names.length && (cl.wantsSummary || cl.wantsCompare || cl.wantsOpinion))) {
+    const aboutContract = cl.topic === 'contract'
+      || cl.names.length > 0
+      || cl.mentioned.length > 0;
+    if (aboutContract && (cl.wantsSummary || cl.wantsCompare || cl.wantsOpinion || cl.names.length > 0 || cl.mentioned.length > 0 || cl.an.qtype === 'yn')) {
       return contractAnswer(full, cl, rnd);
     }
 

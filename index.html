@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="./src/styles/components.css">
 <link rel="stylesheet" href="./src/styles/screens.css">
 <link rel="stylesheet" href="./src/styles/desk.css">
+<link rel="stylesheet" href="./src/styles/contracts.css">
 </head>
 <body data-screen="menu" data-scale="md">
 
@@ -370,6 +371,26 @@
         <div class="news__grid" id="newsGrid"></div>
       </footer>
     </section>
+    <!-- ═════════ suppliers ═════════ -->
+    <section class="view" id="view-contracts" aria-label="Suppliers">
+      <header class="sup-head">
+        <div class="sup-head__top">
+          <button class="btn btn--ghost btn--sm" type="button" data-action="desk">
+            <svg class="i i--16" aria-hidden="true"><use href="#i-home"/></svg>
+            desk
+          </button>
+          <h1 class="sup-title">suppliers</h1>
+          <div class="sup-commit" id="supCommit"></div>
+        </div>
+        <nav class="sup-tabs" id="supTabs" role="tablist" aria-label="Supplier type"></nav>
+      </header>
+
+      <div class="sup-body">
+        <nav class="sup-list" id="supList" aria-label="Suppliers"></nav>
+        <article class="sup-sheet" id="supSheet" aria-live="polite"></article>
+      </div>
+    </section>
+
   </main>
 </div>
 

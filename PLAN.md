@@ -999,6 +999,8 @@ The HUD consumes `cash`, `cashDeltaWeek`, `rp`, `rpRatePerWeek` on **every** scr
 
 **Performance contract.** The desk is always mounted and updates every tick: target **< 2ms** per tick for the whole screen. Achieved by: one CSS-var write for the diorama, one `text` write per figure, and an SVG path `d` swap only when the week advances. No re-layout on tick, no element creation.
 
+**Built: the suppliers screen** (`src/ui/contracts.js`, `src/styles/contracts.css`). The drawer's `contracts` entry now opens a real screen: four tabs (fab / factory / pcb / shipping), three houses each, one page per sheet, and a commitments readout in the header (signed, up-front, slowest lead). Opening a sheet is reading it — an unread sheet cannot be signed, countered, summarised or compared. One counter-offer per contract, permanently spent once used. Offers are seeded from the save id, so a reload cannot reroll a deal.
+
 ### 5d. Global HUD — cash & research points
 
 Both are **persistent, global, top-right, same position on every screen**. Not per-screen, not duplicated, not in a modal. The player's eye should learn one coordinate in the first thirty seconds and never hunt again.

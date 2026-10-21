@@ -12,6 +12,7 @@ import {
 } from './app/store.js';
 import { mountDesk } from './ui/desk.js';
 import { PRIMARY, MORE, sectionButton, markCurrent } from './ui/sections.js';
+import { mountContracts } from './ui/contracts.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, props = {}, ...children) => {
@@ -40,6 +41,7 @@ const state = {
   speed: 0,
   timer: null,
   desk: null,
+  contracts: null,
 };
 
 const SPEED_MS = { 1: 1200, 4: 480, 16: 190 };
@@ -70,6 +72,16 @@ function toast(message, { warn = false, ms = 3200 } = {}) {
 /* ── routing ──────────────────────────────────────────────── */
 
 function go(screen) {
+  if (state.screen === 'desk' && screen !== 'desk') {
+    stopClock();
+    state.desk?.destroy();
+    state.desk = null;
+  }
+  if (state.screen === 'contracts' && screen !== 'contracts') {
+    state.contracts?.destroy();
+    state.contracts = null;
+  }
+
   state.screen = screen;
   document.body.dataset.screen = screen;
   if (screen !== 'desk') setDrawer(false);
@@ -78,13 +90,16 @@ function go(screen) {
   if (screen === 'menu') renderMenu();
   if (screen === 'newgame') prepareNewGame();
   if (screen === 'desk') startDesk();
+  if (screen === 'contracts') startContracts();
 }
 
 /* ── sidebar (all screens) ────────────────────────────────── */
 
 function pickSection(section) {
   markCurrent(section.id);
-  if (state.screen !== 'desk') return toast('start a game to open a section', { warn: true });
+  const hasSave = Boolean(state.save ?? (state.profile && latestSave(state.profile.id)));
+  if (!hasSave) return toast('start a game to open a section', { warn: true });
+  if (section.id === 'contracts') return go('contracts');
   return toast(`${section.label} screen is not built yet.`, { warn: true });
 }
 
@@ -111,7 +126,7 @@ function renderDrawer() {
 
 function renderSidebar() {
   const nav = $('#sideNav');
-  const inGame = state.screen === 'desk';
+  const inGame = state.screen === 'desk' || state.screen === 'contracts';
 
   nav.replaceChildren(...PRIMARY.map((section) => {
     const button = sectionButton(section, { variant: 'nav', disabled: !inGame });
@@ -323,6 +338,17 @@ function startDesk() {
   });
 
   setSpeed(1);
+  return undefined;
+}
+
+function startContracts() {
+  const save = state.save ?? (state.profile && latestSave(state.profile.id));
+  if (!save) {
+    toast('no save to open', { warn: true });
+    return go('menu');
+  }
+  state.save = save;
+  state.contracts = mountContracts({ save, onBack: () => go('desk') });
   return undefined;
 }
 
@@ -593,7 +619,6 @@ function fmtMoney(n) {
 /* ── keyboard ─────────────────────────────────────────────── */
 
 function goMenu() {
-  if (state.screen === 'desk') stopClock();
   go('menu');
 }
 
@@ -602,6 +627,7 @@ document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
   if (modalOpen) { closeModal(); return; }
   if (drawerOpen()) { setDrawer(false); return; }
+  if (state.screen === 'contracts') { go('desk'); return; }
   if (state.screen === 'desk' || state.screen === 'newgame') goMenu();
 });
 
