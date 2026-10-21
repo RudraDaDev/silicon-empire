@@ -577,38 +577,105 @@ The tension between them is the game: perf costs unit cost, unit cost buys deman
 risk is where cheap becomes expensive, and time to market is where perfection becomes
 irrelevant.
 
-### 3e.2 The steps
+### 3e.2 The wizard — nine stages, one screen
 
-1. **Pick the product.** Catalogue row, filtered by era. Gated by `year` and by the
-   player's capability; the row shows *why* it is unavailable rather than hiding.
-2. **Choose the guts.** Every `spec` is a control. A gated level is shown **locked with
-   its unlock reason** — `16-bit core · research 1993` — never hidden (§4a rule).
-   Numeric specs are sliders with a cost curve drawn on them, so "bigger" is visibly
-   more expensive as you drag.
-3. **Make or buy, per input.** `contains[]` is a list, and every child is a decision:
-   *buy at market* (cash now, reliable), *make it yourself* (cheaper per unit at volume,
-   capex and a second yield curve to manage), or *use something you already make*. This
-   is the single richest strategic axis in the game and it exists from act 0 — where the
-   printer makes the case and everything else is bought.
-4. **Read the four numbers, then commit.** Committing is the irreversible act: tooling or
-   NRE is spent, the clock starts, and the sheet locks. Everything before this point is
-   free to change.
+A single left-to-right flow with **the four numbers pinned in a sticky rail** for the whole
+of it. Nothing is spent and nothing locks until the last stage, so a player can walk
+backwards as far as they like.
+
+| # | Stage | What the player does | What it moves |
+|---|---|---|---|
+| 1 | **product selection** | pick the catalogue row. Era-gated, and an unavailable row says why (`needs 16-bit core · research 1993`) instead of vanishing | — |
+| 2 | **name & series** | name the model and file it under a series | brand, series equity |
+| 3 | **components** | every input, **stacked vertically and grouped by its own category** — one scroll, not one stage per part | unit cost, perf, defect risk |
+| 4 | **supplier contracts** | attach a signed fab / factory / pcb contract to the inputs that need one | unit cost, lead time, defect ceiling |
+| 5 | **pcb puzzle** | lay the parts out and route them | board cost, defect risk, size |
+| 6 | **enclosure** | material, finish, volume, wall thickness | cost, thermal, perceived quality |
+| 7 | **features** | toggles — backlight, wireless, hot-swap, rgb, extras | BOM, appeal, defect risk |
+| 8 | **intended use** | who it is for: segment and channel | which expectations the review grades against |
+| 9 | **datasheet** | the sheet writes itself from your choices; add up to three lines of flourish | attention, expectations |
+
+**Stage 3 is the important one.** Components are not a sequence of screens — that would be
+twenty stages for a phone. They are **categories, each a section of one scroll**:
+
+```
+compute     mcu ................. [ yours ] [ contract ] [ spot ]
+            memory .............. [ 512 kb ] [ 1 mb ▲ ]
+power       battery ............. [ none ] [ aaa ] [ coin ]
+io          switches ............ [ membrane ] [ mechanical ✓]
+            cable ............... [ usb-a ] [ usb-c 1996 ]
+mechanical  case ................ [ printed ✓ ] [ bought ]
+```
+
+Each row: the part, the options, a source chip (yours / a contract / spot price), and its
+live effect on the four numbers. A category with nothing in it collapses to one line. The
+whole step is scannable in a couple of seconds because it is a *list of parts*, not a game
+of its own.
+
+**Stage 4 is where contracts earn their place.** A contract is not a screen — it is a
+*slot on a component row*. If you have signed `fab b`, the mcu row offers it, and attaching
+it swaps the spot price for the contracted price and lead time:
+
+```
+mcu    spot $4.20 · 2 wk   │  fab b contract $3.30 · 9 wk   ✓ attached
+```
+
+The trade is visible and it is the whole point of act 1: cheaper per unit, longer to wait.
+A design can mix sources — contract memory, spot everything else — and the lead time of a
+product is the **maximum** across its inputs, not the sum.
+
+**Stage 5, the pcb puzzle.** A small deterministic grid puzzle, thirty to ninety seconds,
+never more:
+
+- place the parts you selected onto a board (the grid scales with the product: 8×6 for a
+  keyboard, 12×8 for a device, more later);
+- route the connections. Crossings are violations; long traces cost signal integrity;
+- constraints that make it a puzzle rather than decoration: **board area** (cost), **layer
+  count** (2 = cheap and hard, 4 = dear and easy), **heat** (power parts away from
+  thermally sensitive ones), **connector reach** (ports must touch an edge);
+- the result is a **score** that feeds defect risk — a clean board is worth a few points of
+  review, a crossed one is worth a return rate;
+- an **auto-route** button exists and costs money: a mediocre legal layout, for players who
+  do not want the puzzle. It is never as good as a careful board, and that is the reward
+  for doing it by hand.
+
+The puzzle is deterministic from the placed parts, so the same design always yields the
+same board and a save round-trip is stable.
+
+**Stage 9, the datasheet.** Generated from the design, in plausible spec-sheet language —
+`5 V ±5%`, `pin 3: ground`, `adapter: usb-a to ps/2`, `rated 20 ma`, `operating 0–40 °C`.
+The player may add up to three lines of flourish from a generated vocabulary or typed
+freely. Flourish is a **claim**, lightly scored: it buys a little attention at launch and,
+if it oversells what the sheet actually says, costs a little review. It can never be
+false — the vocabulary is drawn from things the design can actually claim.
+
+**The datasheet is also the commit page.** It is the last thing you see before the tooling
+is spent, and it is the only stage where the button says *release* rather than *next*.
+
+### 3e.3 Series
+
+A series is a name that outlives a model: `nova k1 → k2 → k3`. Filing a design under an
+existing series carries its reviews forward at a fraction, which is why a good series is
+worth more than a good product. It also constrains: one series holds at most four live
+models, and a retired series decays.
+
+### 3e.4 After commit
+
+Ramp, launch, harvest, refresh, retire — unchanged from the loop in §3b:
+
 5. **Ramp.** Yield starts low and climbs with cumulative units made (a learning curve, not
    a switch). A new node starts worse. The ramp is why the first thousand units are
    expensive and the ten-thousandth is not.
-6. **Launch.** Reviews are computed from weighted components — **all shown** (R: never one
-   opaque number): perf vs segment, defects escaped, price vs nearest alternative,
-   delivery speed. The review is the marketing you cannot buy in act 0.
-7. **Harvest.** Price is a live slider with the demand curve drawn under it. Volume is
-   split by the sell-or-consume ratio (§4a): sold units earn cash and arm rivals; consumed
-   units make your own products cheaper. Both endpoints are legal strategies.
-8. **Refresh or retire.** A *refresh* is the same product with one variant bumped — half
-   the tooling, half the time, resets the review decay. A *retire* stops support cost and
-   frees the name. The decision at the back half of a generation is usually "refresh once,
-   then let it die", and getting that wrong is how you end up supporting three products
-   that sell nothing.
+6. **Launch.** Reviews are computed from weighted components — **all shown**: perf vs
+   segment, defects escaped, price vs nearest alternative, delivery speed.
+7. **Harvest.** Price is a live slider with the demand curve drawn under it. Volume splits
+   by the sell-or-consume ratio (§4a): sold units earn cash and arm rivals; consumed units
+   make your own products cheaper.
+8. **Refresh or retire.** A refresh is the same product with one variant bumped — half the
+   tooling, half the time, resets the review decay. A retire stops support cost and frees
+   the name.
 
-### 3e.3 What a design costs, by act
+### 3e.5 What a design costs, by act
 
 | | Act 0 (rig) | Act 1 (suppliers) | Act 2+ (silicon) |
 |---|---|---|---|
@@ -621,7 +688,7 @@ mistake in the game: it costs the NRE again and four months. Prototyping before 
 is the mitigation, and prototyping costs a week and 5% of the NRE — cheap enough to be
 worth doing, expensive enough to skip when you are in a hurry.
 
-### 3e.4 Designs are assets
+### 3e.6 Designs are assets
 
 A committed design is stored as a board row: specs, BOM decisions, yield curve position,
 review history, units sold, cumulative profit (which is what the desk chart plots per
@@ -633,20 +700,32 @@ reason it is cheap.
 of sufficient size, at a cost to them. This is the counterweight to sitting on one good
 product forever.
 
-### 3e.5 Act 0's version of the loop
+### 3e.7 Act 0's version of the loop
 
-Deliberately thin, so the whole loop fits in one screen and one sitting:
+Deliberately thin: the same nine stages, with five of them empty because nothing is
+irrevocable yet.
 
 ```
-pick keyboard | mouse | keycaps | case
-  → choose geometry (printed: case shape, keycap profile)
-  → choose bought parts (switch type, cable, mcu, pcb) from a list with prices
-  → price it
-  → print this week, assemble this week, list it
+1 product    keyboard | mouse | keycaps | case
+2 name       one field, and "series" is just the model family name
+3 components case ✓ printed · switches · cable · mcu · pcb
+4 contracts  none — you have no suppliers yet
+5 pcb puzzle 4x3 grid, three parts. exists from the first keyboard, because it is
+             the part of the loop that is fun and it should not be a late reward
+6 enclosure  printed: shape, wall thickness, profile
+7 features   backlight (no), wireless (no — not until 1994)
+8 intended    home office | bedroom | gift
+9 datasheet  auto, plus one line of flourish
+→ print this week, assemble this week, list it
 ```
 
 No tooling, no ramp, no respin — the four numbers are all it has, and all four already
-matter. The act teaches the sheet before anything is irrevocable.
+matter. The act teaches the sheet before anything is irrevocable, and it teaches the
+puzzle while the stakes are a day's resin.
+
+The **pcb puzzle in act 0 is 4×3 with three parts**, which takes about fifteen seconds and
+is winnable by luck. By act 1 it is 8×6; by act 2, 12×8 with layer pressure. That
+progression is the tutorial for a single mechanic rather than a new mechanic per act.
 
 **Open:** whether prototypes are in the M1 slice or act 0 only; how many refresh cycles
 before a product's demand curve is dead regardless of review.
