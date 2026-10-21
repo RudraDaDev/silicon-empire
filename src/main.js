@@ -13,6 +13,7 @@ import {
 import { mountDesk } from './ui/desk.js';
 import { PRIMARY, MORE, sectionButton, markCurrent } from './ui/sections.js';
 import { mountContracts } from './ui/contracts.js';
+import { mountOffer } from './ui/offer.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, props = {}, ...children) => {
@@ -42,6 +43,7 @@ const state = {
   timer: null,
   desk: null,
   contracts: null,
+  offer: null,
 };
 
 const SPEED_MS = { 1: 1200, 4: 480, 16: 190 };
@@ -81,6 +83,10 @@ function go(screen) {
     state.contracts?.destroy();
     state.contracts = null;
   }
+  if (state.screen === 'offer' && screen !== 'offer') {
+    state.offer?.destroy();
+    state.offer = null;
+  }
 
   state.screen = screen;
   document.body.dataset.screen = screen;
@@ -91,6 +97,7 @@ function go(screen) {
   if (screen === 'newgame') prepareNewGame();
   if (screen === 'desk') startDesk();
   if (screen === 'contracts') startContracts();
+  if (screen === 'offer') startOffer();
 }
 
 /* ── sidebar (all screens) ────────────────────────────────── */
@@ -126,7 +133,7 @@ function renderDrawer() {
 
 function renderSidebar() {
   const nav = $('#sideNav');
-  const inGame = state.screen === 'desk' || state.screen === 'contracts';
+  const inGame = ['desk', 'contracts', 'offer'].includes(state.screen);
 
   nav.replaceChildren(...PRIMARY.map((section) => {
     const button = sectionButton(section, { variant: 'nav', disabled: !inGame });
@@ -338,6 +345,17 @@ function startDesk() {
   });
 
   setSpeed(1);
+  return undefined;
+}
+
+function startOffer() {
+  const save = state.save ?? (state.profile && latestSave(state.profile.id));
+  if (!save) {
+    toast('no save to open', { warn: true });
+    return go('menu');
+  }
+  state.save = save;
+  state.offer = mountOffer({ save, onBack: () => go('contracts') });
   return undefined;
 }
 
@@ -627,6 +645,7 @@ document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
   if (modalOpen) { closeModal(); return; }
   if (drawerOpen()) { setDrawer(false); return; }
+  if (state.screen === 'offer') { go('contracts'); return; }
   if (state.screen === 'contracts') { go('desk'); return; }
   if (state.screen === 'desk' || state.screen === 'newgame') goMenu();
 });
@@ -646,6 +665,10 @@ function boot() {
   });
 
   document.querySelectorAll('[data-action="menu"]').forEach((b) => b.addEventListener('click', goMenu));
+  document.querySelectorAll('[data-action="offer"]').forEach((b) => b.addEventListener('click', () => {
+    if (state.screen === 'offer') return;
+    go('offer');
+  }));
 
   $('#sideMore').addEventListener('click', (event) => {
     event.stopPropagation();

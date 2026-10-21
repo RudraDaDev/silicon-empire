@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="./src/styles/screens.css">
 <link rel="stylesheet" href="./src/styles/desk.css">
 <link rel="stylesheet" href="./src/styles/contracts.css">
+<link rel="stylesheet" href="./src/styles/offer.css">
 </head>
 <body data-screen="menu" data-scale="md">
 
@@ -381,6 +382,10 @@
           </button>
           <h1 class="sup-title">suppliers</h1>
           <div class="sup-commit" id="supCommit"></div>
+          <button class="btn btn--sm btn--accent" type="button" data-action="offer">
+            <svg class="i i--16" aria-hidden="true"><use href="#i-contract"/></svg>
+            draft a contract
+          </button>
         </div>
         <nav class="sup-tabs" id="supTabs" role="tablist" aria-label="Supplier type"></nav>
       </header>
@@ -389,6 +394,37 @@
         <nav class="sup-list" id="supList" aria-label="Suppliers"></nav>
         <article class="sup-sheet" id="supSheet" aria-live="polite"></article>
       </div>
+    </section>
+
+    <!-- ═════════ writing a contract ═════════ -->
+    <section class="view" id="view-offer" aria-label="Draft a contract">
+      <header class="off-head">
+        <button class="btn btn--ghost btn--sm" type="button" data-action="contracts">
+          <svg class="i i--16" aria-hidden="true"><use href="#i-arrow"/></svg>
+          suppliers
+        </button>
+        <h1 class="off-title">draft a contract</h1>
+        <span class="off-progress" id="offerProgress">0 of 6 sections</span>
+      </header>
+
+      <div class="off-body">
+        <aside class="off-buyers">
+          <p class="lbl">offer it to</p>
+          <nav class="buyer-list" id="offerBuyers" aria-label="Counterparties"></nav>
+        </aside>
+
+        <div class="off-steps" id="offerSteps"></div>
+
+        <aside class="off-verdict" id="offerVerdict" aria-live="polite" data-state="idle"></aside>
+      </div>
+
+      <footer class="off-foot">
+        <p class="off-foot__hint">two boxes per section. you will live with whichever you pick.</p>
+        <button class="btn btn--accent" type="button" id="offerSend" disabled>
+          send the offer
+          <svg class="i i--16" aria-hidden="true"><use href="#i-arrow"/></svg>
+        </button>
+      </footer>
     </section>
 
   </main>
