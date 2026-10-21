@@ -51,6 +51,9 @@ silicon-empire/
 ├── PLAN.md                    # this file
 ├── README.md
 ├── VENDOR.md                  # csui commit SHA + local patches, listed explicitly
+├── NLP-LITE-SMALLHOURS.js     # the text engine, vendored verbatim. NEVER edited.
+├── tools/
+│   └── pip-smoke.mjs          # headless PIP checks: intents, determinism, read-gating
 ├── vendor/
 │   └── csui.js                # pinned copy. NEVER edited except for the log-gate patch below.
 ├── design/                    # reference docs (not shipped)
@@ -93,7 +96,8 @@ silicon-empire/
 │   │   └── screens/
 │   │       ├── home.js        # MAIN SCREEN / SPIKE — built first (§5d)
 │   │       ├── diorama.js     # centre illustration states + fill animation
-│   │       ├── sidebar.js     # device taskbar: clock, battery, nav
+│   │       ├── sections.js    # primary rail + drawer destinations
+│   │       └── pip/panel.js   # PIP transcript, suggested questions, track record
 │   │       ├── catalog.js     # product-category picker, generated from data
 │   │       ├── design.js
 │   │       ├── lab.js         # tech tree (SVG)
@@ -379,6 +383,9 @@ can therefore never perturb the sim, and a golden-file test can pin its answers.
 | **Advise** | "should I buy a second rig" | lays out the arithmetic and the risk, recommends nothing outright |
 | **Explain** | "why did reviews drop" | cites the 2–3 biggest contributions, no single opaque score |
 | **Predict** | "will dram prices rise this quarter" | always ships a confidence and a basis |
+| **Opinion** | "what do you think of fab b" | **PIP's own view, in the first person**, labelled as a read and not a calculation — no confidence number, because a stance is not a forecast |
+| **Summary** | "summarise the fab a contract" | only for a sheet you have already read |
+| **Compare** | "compare fab a and fab b" | two read sheets, field by field, naming which side wins and by how much |
 | **Refuse** | "sign the fab deal for me" | declines in character, points at the screen |
 
 ### 3c.3 Being wrong on purpose
@@ -400,11 +407,17 @@ its market timing, and that knowledge is earned, not granted.
 
 ### 3c.4 What it refuses to do
 
-- **Contracts.** PIP helps without reading for you: it explains jargon (people don't know
-  what NRE or net-60 is), says what a clause *does* in plain words, and names the
-  trade-off in generic terms — but it will not tell you whether a particular page is a
-  good deal. That judgement stays with you, which is where the mechanic lives. A hired
-  contracts lawyer annotates the page itself.
+- **Contracts.** Three levels, and the line between them is the whole point:
+  1. **Unread** — PIP will not summarise it, quote it, or leak a number from it. *"open it
+     and read it — i will summarise it after, but i will not read it for you."* The read
+     flag flips when the sheet has actually been opened.
+  2. **Read** — PIP summarises the clauses, translates jargon (NRE, net-60, MOQ), and
+     compares two read sheets field by field: which is cheaper per unit, faster, smaller
+     MOQ, longer to pay, stronger penalty, dearer tooling.
+  3. **Judgement** — it will give an opinion if asked, and it is a *read*, not a verdict.
+     Whether to sign stays with you, which is where the mechanic lives.
+  A hired contracts lawyer annotates the page itself, so the clauses stop needing
+  translation and the summaries get shorter.
 - **Actions.** No auto-pricing, no auto-hiring, no "fix it" button.
 - **Hidden state.** No rival internals, ever.
 - **Guarantees.** No answer phrased as certainty, even when it is right.
@@ -420,19 +433,43 @@ still fully playable; PIP is the difference between a good decision and a lucky 
 
 ### 3c.6 Integration seam
 
-The engine is the user's own lite NLP implementation, vendored, not rewritten.
+The engine is `NLP-LITE-SMALLHOURS.js` at the repo root — the user's own bundled
+Small Hours NLP, vendored verbatim and **never edited**.
 
-- Lives in `vendor/pip/` (or `src/pip/`), **never** in `src/sim/` — R1 still holds.
-- Must be pure ES modules with **no network, no worker, no DOM** — it has to run in Node
-  for the determinism tests.
-- Exposed through one adapter, `src/ui/pip/adapter.js`:
-  `createPip({ engine, world, rngPip }) -> { ask(text) -> { kind, text, confidence, basis, topics, refs, offer } }`
-- If the engine fails to load, the adapter falls back to a small canned responder so the
-  game never breaks on a missing file.
+**What it is.** 636 lines / 63 KB, one UMD file: `require()` in Node, a plain
+`<script>` in the browser setting `window.NLP_SH`. No dependencies, no DOM, no
+`fetch`, no worker. `analyze()` is pure and stable — verified by calling it twice.
 
-**Open questions for the handover:** entry-point signature, module format (ESM vs IIFE),
-whether it carries its own RNG or takes a seed, total size, and whether intents are
-extensible without editing the engine.
+**API:** `normalize · analyze · reflect · cap · pick · fill · fuzzy · clean · claims ·
+splitClauses · qfix · isFiller · isGreeting · PEOPLE · dayOffset · weekday`.
+`analyze(raw)` returns `{ raw, t, I, words, sent, shout, q, loc, honest, len, empty,
+negated, clauses, qtype, people, pron, facts, memq, opq, short, topics, tset, meta,
+about, greet, claims, nums, money, nights, ref }` — `qtype` and `opq` are what drive
+opinion detection, and `isFiller`/`isGreeting` keep the transcript from answering "ok".
+
+**Two things it does not do for us.** It is a *narrative* engine: "why did my reviews
+drop" parses as `qtype: "why"` with no topics, and there are no game intents. And its
+`pick()` draws from `Math.random`, so the adapter never calls it — variety comes from a
+mulberry32 stream seeded on `(seed, tick, question)`.
+
+**Adapter** — `src/pip/adapter.js`, the only place the game talks to the engine:
+
+```js
+createPip({ engine, seed, world }) -> {
+  ask(text, ctx) -> { kind, text, confidence?, basis, refs, claim?, resolvesOnTick? }
+  settle(prediction, actual) -> { ...prediction, hit, settledOnTick }
+  classify(text) -> { topic, wantsOpinion, wantsSummary, wantsCompare, wantsPredict,
+                      wantsAction, wantsAdvice, names }
+}
+```
+
+It adds the game lexicon (cash, contract, capacity, reviews, demand, price, rivals,
+marketing, staff), six answer kinds plus refuse, and byte-stable answers per tick.
+`tools/pip-smoke.mjs` runs 13 assertions headless — load, ten intents, determinism
+within a tick, change across ticks, and that an unread sheet never leaks its numbers.
+
+**Still to come:** the panel UI (`src/ui/pip/panel.js`) — transcript, suggested
+questions, track record. The adapter is engine-complete without it.
 
 ---
 
