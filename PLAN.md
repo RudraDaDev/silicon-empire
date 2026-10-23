@@ -847,7 +847,13 @@ All 109 products and 132 brands are authored as data from the start, but only ~8
 
 ## 5. UI layer
 
-### 5a. Design language — **informal editorial, dark**
+### 5a. Design language — **Neo-Brutalism, dark by default**
+
+> Superseded text below is the original editorial direction and is kept only for the token
+> table's history. **The live language is Neo-Brutalism** (`src/styles/tokens.css`): 3px ink
+> borders, zero-blur offset shadows, saturated accent blocks, heavy lowercase type, ice-blue
+> accent `#6FD0FF`. The serif/editorial palette described here is not what ships.
+
 
 Live reference: **`design/styleguide.html`** (served at `/design/styleguide.html`). That file is the source of truth for tokens, parts, and the designer layout; this section is the reasoning.
 
@@ -1190,17 +1196,77 @@ Step 3 is the risk gate. If the binder fights us across that one screen, we stop
 
 ---
 
-## 9. Open questions for you
+## 9. Open questions
 
-1. **Start year 1990 confirmed?** It makes the first ~6 years deliberately slow (386/486 era, small market). Starting 1993 with 1990–93 as a scripted prologue is the alternative.
-2. **Player company** — invented name, or pick from 2–3 presets (a scrappy fabless startup, a vertically integrated giant, a Japanese electronics conglomerate)?
-3. **Difficulty model** — fixed, or selectable (casual / realistic / brutal) by scaling rival aggression and capital?
-4. **The 3,000-node ambition** — expand the tree after the slice ships, or cut to ~400 well-chosen nodes permanently? I'd cut.
-5. **Battery = cash runway, or literal device battery?** I recommend runway — a draining battery is the most legible insolvency warning in games. Literal battery is flavour only and will feel like dead UI.
-6. **Does the desk ever scroll, or is it a fixed viewport?** I'd make it fixed at 100vh (no page scroll) so it reads as a device; sub-screens scroll internally. That's a real constraint on future screen design, so worth deciding now.
-7. **Blackletter line** — keep `founded 1990 · by <player>` as clean spaced mono, or self-host one display font for that single line? I lean mono; fraktur on a 10px line is unreadable.
-8. **Starting position** — a fabless designer, a module maker, an IDM with one old fab, or a blank-slate startup with cash only? Each teaches a different part of the chain; the module maker is the gentlest tutorial.
-9. **Can the player operate at several layers at once** (sell cells *and* phones), or is multi-layer integration gated behind a "vertically integrated" milestone? I lean: allowed from M2, because that's the actual fantasy.
-10. **Do OS and software count as products the player ships**, or only as enablers? `DOMAINS.md` §6 assumes the former — confirm, since it roughly doubles the M4 scope.
+Everything below is still undecided. Answered questions have been removed and their
+answers live in the sections that own them.
 
-Answer those and I'll start at step 1–3: vendor csui, stand up the sim skeleton with the determinism test, and build the Home desk spike so we can judge the UI approach — and the diorama fill — on a running screen.
+1. **Act 0's constants.** Rig slots (16/week), scrap (12%), living costs (150/week) and the
+   four SKUs' BOM are my proposals, not your numbers. They set the pace of the whole first act.
+2. **Difficulty.** Fixed, or selectable — and if selectable, does it scale starting savings,
+   rival aggression, or both?
+3. **Mobile.** The brief says browser *and* mobile. The desk is a fixed viewport at 100vh with
+   a three-column body; phones need a decision about what the desk becomes, not a media query.
+4. **Audio.** Never designed. Decide whether the game has sound at all before UI hooks get built.
+5. **Prototypes.** A week and 5% of NRE buys a prototype that de-risks a mask respin. Is that in
+   the M1 slice, or act 0 only?
+6. **Refresh lifetime.** How many refresh cycles before a product's demand curve dies regardless
+   of review?
+
+## 10. Planning backlog — what is still undesigned
+
+Ordered by what blocks the most work. Everything in §3–§3e is specified; this is the rest.
+
+### 10a. Blocks the first playable act (the bedroom)
+
+| # | Missing | Why it blocks | Rough scope |
+|---|---|---|---|
+| 1 | **Act 0 economy numbers** — rig slots, scrap rate, resin cost, living costs, the four SKUs' BOM/price | the sim cannot start without constants | one table, tuned by the balance harness |
+| 2 | **Demand & review model** — how orders arrive, what a review grades, how price moves volume | every act uses it; act 0 is where it must be legible | segments, price elasticity, review components |
+| 3 | **The rig / production model** — slots, queue, scrap, lead time on bought parts | the only factory the player has in act 0 | weekly pipeline, same shape as fabs so act 2 reuses it |
+| 4 | **Save format & versioning** — schema, migration, what happens when the sim changes | saves exist already but only carry stubs | version field, migration table, round-trip test |
+| 5 | **The scorecard** — what 2055 grades | now that the stop is decided, the shape of the whole run is undefined | 8–10 figures, shown at the end |
+
+### 10b. Blocks act 1 (suppliers)
+
+| # | Missing | Why |
+|---|---|---|
+| 6 | **R&D / lab** — how RP accrues, project slots, tree shape, date gates | the garage sells nothing new without it |
+| 7 | **Rival AI** — personalities exist in `BRANDS.md`, no decision rules | the market is static without it |
+| 8 | **Finance** — debt facility terms, valuation formula, taxes | the gate hands you suppliers; the bank hands you rope |
+| 9 | **Employees** — hiring, morale, attrition, review | the state shape has them; nothing gives them behaviour |
+| 10 | **Marketing** — campaigns, segment reach, decay | the rail has the drawer entry and no mechanic behind it |
+| 11 | **Browser / intel** — what money buys, how PIP is gated by it | PIP's answers depend on it |
+
+### 10c. Blocks act 2+ (silicon)
+
+| # | Missing | Why |
+|---|---|---|
+| 12 | **Fab ownership** — capex, capacity, wafer starts, multi-product allocation | buying your own line is the act's whole promise |
+| 13 | **Patents & litigation** — filing, defence, countersuit | mentioned three times, designed zero |
+| 14 | **Stock market / IPO** — when, at what price, and what it changes | late-game capital formation |
+| 15 | **M&A / takeover** — buying a rival, being bought | the exit |
+
+### 10d. Screens with no spec
+
+The rail is built; the destinations are not. Each needs a one-page contract: what is on it, what
+changes weekly, what the player can do — then it is a data view over sim state.
+
+`market` · `browser` · `employee` · `fab` · `finance` · `news` · `company` · `lab` · `pip panel`
+
+### 10e. Cross-cutting
+
+| # | Missing | Note |
+|---|---|---|
+| 16 | **Difficulty** — fixed, or scaling rival aggression and starting capital | cheapest before the sim exists |
+| 17 | **Onboarding** — act 0 is the tutorial; is there also help text or a codex? | affects copy volume, not systems |
+| 18 | **Mobile / touch** — the original brief said browser and mobile | the desk is a fixed viewport; phones need a decision, not a media query |
+| 19 | **Audio** — never designed | decide whether there is any before building UI hooks |
+| 20 | **Balance targets** — the harness exists in principle, no pass/fail numbers beyond bankruptcy and share | needs the act-0 constants first |
+
+### 10f. What I would do next
+
+1. **Act 0 economy table** and **demand/review model** — together they make the bedroom playable, which is the first thing worth looking at.
+2. **Save versioning** — cheap now, expensive after a hundred saves exist.
+3. **One screen spec** (`market`) as the template for the other eight.
+4. Everything else waits for a playable act 0.
