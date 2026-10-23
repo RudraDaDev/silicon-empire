@@ -1198,22 +1198,17 @@ Step 3 is the risk gate. If the binder fights us across that one screen, we stop
 
 ## 9. Open questions
 
-Everything below is still undecided. Answered questions have been removed and their
-answers live in the sections that own them.
+Only tuning is left; every design question is answered in §3–§3e and §11.
 
-1. **Act 0's constants.** Rig slots (16/week), scrap (12%), living costs (150/week) and the
-   four SKUs' BOM are my proposals, not your numbers. They set the pace of the whole first act.
-2. **Difficulty.** Fixed, or selectable — and if selectable, does it scale starting savings,
-   rival aggression, or both?
-3. **Mobile.** The brief says browser *and* mobile. The desk is a fixed viewport at 100vh with
-   a three-column body; phones need a decision about what the desk becomes, not a media query.
-4. **Audio.** Never designed. Decide whether the game has sound at all before UI hooks get built.
-5. **Prototypes.** A week and 5% of NRE buys a prototype that de-risks a mask respin. Is that in
-   the M1 slice, or act 0 only?
-6. **Refresh lifetime.** How many refresh cycles before a product's demand curve dies regardless
-   of review?
+1. **Act 0's constants** (§11a) — 16 slots, 12% scrap, 150/week, 2 orders/week. Proposed from
+   arithmetic, not yet measured. The balance harness settles them.
+2. **Prototypes in M1?** (§3e.5) — a week and 5% of NRE to de-risk a respin.
+3. **Refresh lifetime** (§3e.4) — how many cycles before a demand curve dies regardless of review.
 
 ## 10. Planning backlog — what is still undesigned
+
+> **Superseded by §11**, which specifies every item below. Kept because it records the order
+> the work was tackled in and why (blocking-first rather than alphabetical).
 
 Ordered by what blocks the most work. Everything in §3–§3e is specified; this is the rest.
 
@@ -1270,3 +1265,361 @@ changes weekly, what the player can do — then it is a data view over sim state
 2. **Save versioning** — cheap now, expensive after a hundred saves exist.
 3. **One screen spec** (`market`) as the template for the other eight.
 4. Everything else waits for a playable act 0.
+---
+
+## 11. Systems specs
+
+Every item from §10, decided. Numbers here are **proposals with reasons**, not measurements —
+the balance harness in §3 adjusts them. Where I had to choose, I say so and why.
+
+### 11a. Act 0 economy
+
+The bedroom has to be survivable on a bad week and uncomfortable on a good one. These are the
+constants; the first playable build tunes nothing else.
+
+| Constant | Value | Why |
+|---|---|---|
+| starting savings | 7,000–18,000, seeded | wide enough that difficulty is felt immediately |
+| rig print slots | 16 / week | one keyboard costs 2, so 8 units is a perfect week with no scrap |
+| scrap rate | 12% per print | ~2 lost slots a week; the first upgrade the player wants |
+| resin cost | 1.20 / slot | small enough to forget, big enough to notice at 16/week |
+| living costs | 150 / week | 7,800 a year — the number the runway battery is really showing |
+| bought-part lead time | 2 weeks | cash leaves now, parts arrive later: the first lesson in lead time |
+| hobby-catalogue MOQ | 1 | no gate on the first purchase |
+| order arrival | 2 / week base, +1 per 40 cumulative units, capped by review | demand-bound, not capacity-bound |
+
+**A good week, worked** (script-checked, not estimated): 8 keyboards meant, 7 good after scrap.
+Materials 315.2 — 37 of bought parts each, plus 1.20 of resin per print slot, 8 units × 2 slots.
+Sold at 89 → 623 revenue, **307.8 gross against 150 of living costs, so 157.8 net**. That is 64
+weeks to a 10,000 gate at that rate, which is why the act rewards the second product and the price
+lever rather than more printer hours.
+
+**Knobs, in order of power:** order arrival rate, scrap rate, living costs. Slots only bind once
+demand exists; changing slots first makes the act feel like a clicking game.
+
+### 11b. Demand and review
+
+One model, used in every act. Act 0 is where it must be legible, so every factor is shown.
+
+```
+demand_p = base_p × price_f × review_f × brand_f × place_f × trend_p
+price_f  = (marketPrice / price)^elasticity          clamp 0.1 .. 4.0
+review_f = 0.35 + 1.3 × (review / 100)               at review 0 → 0.35, at 100 → 1.65
+brand_f  = 0.8 + 0.4 × (brand / 100)
+trend_p  = 1 + (weeksLive / lifeWeeks) × 0.25, then decays after peak
+```
+
+`elasticity` is per segment: **1.6 consumer · 1.1 enterprise · 2.2 value**. A value buyer has a
+sharper reaction to price, which is why competing on price is a real strategy and a fragile one.
+
+**Review is four weighted components, all shown** (never one opaque number):
+
+| Component | Weight | Measured as |
+|---|---|---|
+| spec vs segment expectation | 40% | your perf ÷ what the segment expects this year, capped 0..1.4 |
+| defects escaped | 25% | `1 − (returns / unitsSold) × 8`, floored at 0 |
+| price vs nearest alternative | 20% | 1.0 at parity, ±0.5 across a ±40% band |
+| delivery speed | 15% | 1.0 at ≤7 days, decaying to 0 at 60 days |
+
+Review moves **at most 4 points per week** toward its target. A product cannot be rehabilitated in
+a week, and a single bad batch cannot destroy a good product overnight — both are deliberate.
+
+**Orders queue rather than scale instantly**: an order that cannot be met becomes backlog, and
+backlog converts at 70% next week and 40% the week after, then is lost. Selling out is therefore
+*punishing but not fatal*, which keeps the printer scarce without making a stockout a death spiral.
+
+### 11c. Production
+
+One model for the rig, a contract factory, and a fab you own. They differ only in their inputs.
+
+```
+queue: ordered(2wk) → stock → inProduction(slotsWeeks) → finished → goods
+week n:  goods += started[n − leadWeeks] × (1 − scrap)      ← pipeline, not instant
+```
+
+- **Rig**: 16 slots, 1-week production, 12% scrap, inputs bought 2 weeks ahead.
+- **Contract factory**: rate and lead from the signed sheet (`11a`-style table), defects from
+  `maxDefect`, no capex.
+- **Owned fab** (§11k): capacity in wafer starts, yield `Y = exp(−D0 × A)` from §3, lead 6–8 weeks.
+
+**Allocation.** When capacity is short, the player assigns shares to products in the fab screen.
+Default is pro-rata by last week's sales; explicit shares override. Unallocated capacity is idle
+and still costs upkeep — the single most common way to lose money in act 2.
+
+**Scrap and defects are different things.** Scrap is consumed input with no output (`12%` of
+prints). Defects are shipped units that come back (`maxDefect` of units sold). Scrap costs money
+the week it happens; defects cost money and review a fortnight later.
+
+### 11d. Scorecard at 2055
+
+Shown once, at week 3,432, in this order. Deliberately not a single number.
+
+| Line | Why it is there |
+|---|---|
+| final valuation · peak valuation | the headline, and the best you ever were |
+| market share by segment at close | what you actually owned |
+| generations shipped | how much you built, not how much you sold |
+| best-selling product, units | the one that worked |
+| mean review across all shipped products | whether you made good things |
+| shipped-to-market ratio | chips you made vs chips you sold — integration score |
+| longest unbroken profitable run | durability, not luck |
+| contract defaults | the other side of the ledger |
+| survival weeks | 3,432 is the maximum; most runs end early |
+
+A run that ends in bankruptcy also gets the card, with the failure week and the cause as the
+first line. Losing should be as legible as winning.
+
+### 11e. R&D and the lab
+
+```
+rpPerWeek = 4 × Σ(engineer.skill / 100)^1.2 × labBonus × (1 − 0.3 × lowMorale)
+```
+
+- **Three project slots** at start; the lab screen is where they are assigned. A project is a set
+  of tech nodes with a cost in RP and a completion date; the date is what the player plans around.
+- **RP does not stockpile freely** — 2,500 cap, beyond which it decays 5%/week. Sitting on research
+  is not a strategy.
+- **Nodes are gated by year and by prerequisites**, and a gated node is always *shown* with its
+  reason. Three node kinds: capability (`16-bit core`), process (`0.5 µm`), and method (`spread
+  spectrum`, `cache prefetch`).
+- **M1 slice: 80 nodes**, three tiers deep. The full tree is ~400; the 3,000-node ambition is cut,
+  because a tree you cannot finish reading is a tree you cannot plan against.
+- **Research can fail**: at completion, a `1 − (labBonus × 0.08)` chance the project lands as
+  *partially understood* — the capability unlocks at a penalty that a follow-up project removes.
+  Deliberately rare (≤10%), and always visible in the log.
+
+### 11f. Rival AI
+
+Personalities already exist in `BRANDS.md` (six numbers + traits). What was missing is decisions.
+
+**Quarterly**, each active rival runs three checks against its own weights:
+
+1. **Price**: if share fell >3% and cash is healthy, cut price to `price × (1 − 0.06·aggression)`,
+   floored at their unit cost × 1.15.
+2. **Launch**: if a product is ≥2 years old and cash > launch cost, start a design. Product choice
+   is weighted by their segment strengths, not randomly.
+3. **Capacity**: if utilisation >85% for 6 weeks, buy capacity; if <50% for 12, mothball it.
+
+**Personality weights** (0–100) drive those three: `aggression` (price cuts), `innovation`
+(launch cadence), `prudence` (capacity), `brand` (marketing spend), `reach` (how many segments they
+compete in), `patience` (how long they tolerate losses). A rival with patience 20 exits a segment
+after 18 months of losses; one with 90 stays for a decade and ruins your margins.
+
+**Two hard rules.** Rivals never see your hidden state, and rivals draw from `rngAI`, so a player
+UI change cannot perturb them. A rival's decision is logged in the news feed *after* it lands.
+
+### 11g. Finance
+
+| Thing | Rule |
+|---|---|
+| **debt facility** | up to `2 × annualRevenue` or `0.6 × valuation`, whichever is lower. Interest `base + 2% × leverage`, base 9% in 1990 falling to 4% by 2020 |
+| **repayment** | fixed quarterly instalments; missing one raises the rate 2% and logs a default |
+| **valuation** | `revenue × multiple + cash − debt`, multiple 1.5–6 by growth rate and era. Shown, never guessed |
+| **tax** | 30% on profit above 0, with loss carry-forward; a tax credit on R&D spend equal to 8% of RP cost |
+| **bankruptcy** | cash < 0 and no facility available for 4 consecutive weeks → run ends |
+
+Interest is the pressure that makes the gate meaningful: the first loan is what turns a 40-week
+bootstrap into a 20-week one, and the first missed payment is what turns a good company into a
+sold one.
+
+### 11h. Employees
+
+Four roles, and only four: **engineer** (RP and design speed), **designer** (review and brand),
+**marketer** (campaign efficiency), **operator** (yield ceiling and scrap rate).
+
+```
+salary      = 3,000 + 2 × Σskill²        (skill 0–1000, from §3)
+attrition   = 0.05 × (1 − morale/100)²   per month
+morale      = 50 + 0.3×(cash health) − 0.4×(overwork) + 0.2×(review − 50) − 0.5×(recent layoffs)
+```
+
+- **Hiring costs** two weeks and a fee of 1× monthly salary. A hire is a `skill` draw from a band
+  that narrows as your review rises — good people will not join a company making bad products.
+- **Overwork** is a real lever: 20% more output for 30% more attrition. It is the correct choice
+  exactly as often as it is a mistake, and the morale bar says so before the letter does.
+- **Layoffs** cost 2 months of salary each, hit morale hard, and are logged publicly — the news
+  feed does not forget, and neither does hiring for the next year.
+- Employees are **not** a resource to optimise like cash. They leave, and being short-staffed
+  delays designs by weeks, which in this market is the same as cancelling them.
+
+### 11i. Marketing
+
+Three campaign types, all per-segment, all decaying:
+
+| Campaign | Cost | Effect | Lasts |
+|---|---|---|---|
+| **review seeding** | 2,000 | +6 review points to one product, once per product | permanent, once |
+| **print & banner** | 500/week | +8 brand in one segment while running | while funded |
+| **launch push** | 8,000 one-off | first 6 weeks of a new product reach 1.6× demand | 6 weeks |
+
+Brand decays **1.5 points per week** without spend, so marketing is a subscription, not a purchase.
+The correct amount to spend is the amount that keeps brand above the segment's expectation line —
+visible on the market screen, which is why that screen exists.
+
+### 11j. Browser and intel
+
+The drawer's `browser` entry is the only place money buys information.
+
+| Buy | Cost | What you learn |
+|---|---|---|
+| **market snapshot** | free | segment sizes, your share, public prices |
+| **rival portfolio** | 1,500 / rival | their live products, specs, prices |
+| **teardown** | 4,000 | one rival product's true BOM and margin |
+| **roadmap rumour** | 2,500 | 60% chance of a true next-year launch date, 40% chance of noise |
+
+Purchased intel is permanent for that subject and goes stale after 26 weeks (prices move). **PIP
+cannot see any of it until it is bought** — this is the gate that keeps PIP honest and keeps the
+browser worth opening.
+
+### 11k. Owning a fab
+
+| Node era | Capex | Wafer starts / week | Upkeep / week | Lead to first wafer |
+|---|---|---|---|---|
+| 1.0–0.5 µm (1990–95) | 60m | 300 | 90k | 13 weeks |
+| 0.35–0.18 µm (1996–2001) | 400m | 900 | 600k | 20 weeks |
+| 130–65 nm (2002–07) | 1.8b | 2,500 | 2.4m | 26 weeks |
+| 45 nm and below (2008+) | 6b+ | 6,000 | 9m | 34 weeks |
+
+Capex is **10–30% cheaper when a rival is in trouble** (the used-tool market is real and the news
+feed tells you when). Owning a fab changes the game from margin management to **utilisation
+management**: fixed cost per week against a variable number of good dies, which is why allocation
+(§11c) is the central screen of act 2.
+
+**Fab cost is why the shuttle exists.** A 60m line against a 20k company is absurd by design — the
+player rents capacity for a decade before they can consider owning it.
+
+### 11l. Patents and litigation
+
+- **Filing**: 8,000 + 12 weeks per patent. Covers one *capability* node you have researched.
+- **Term**: 17 years from filing (the real pre-1995 US term, and the game stops pretending otherwise).
+- **Effect**: while held, rivals pay you a licence of `2–5%` of the covered product's revenue, or
+  design around you — which costs them 6 months. That is the real value: the delay.
+- **Suit**: filed against a rival shipping a covered capability. Outcomes weighted by portfolio
+  size and who filed first: 45% injunction (they stop shipping), 35% royalty, 20% loss (you pay
+  costs, ~250k, and their patent becomes harder to attack).
+- **Being sued** works the same in reverse, and is how a small company dies in 1997.
+
+Patents are **the only mechanic where the correct play is sometimes to lose slowly** — an
+injunction against a bigger rival is worth more than the royalty.
+
+### 11m. Stock market and IPO
+
+- **Eligibility**: 3 consecutive profitable quarters, revenue > 25m, valuation > 100m.
+- **Pricing**: `valuation × (0.85 + 0.3 × market sentiment)`; sentiment moves with the cycle.
+- **Dilution**: you sell 20–25%. Your ownership percentage is tracked and shown on the company
+  screen, and it is what a takeover bid is made against.
+- **What it changes**: cash for capex (the reason to do it), quarterly reporting (a bad quarter
+  hits price and staff morale), and a constant takeover risk. Going public is trading control for
+  speed, which is exactly the trade the genre is about.
+
+**Buybacks** are allowed above 400m valuation. They are almost always wrong and occasionally
+decisive, and the game does not stop you.
+
+### 11n. M&A
+
+- **Buying**: a rival's valuation is public once you have intel (§11j). An offer above 1.3× closes
+  immediately; 1.0–1.3× may be refused. Buying gives their products, their brand and their people —
+  and their debts, which is the trap.
+- **Being bought**: triggered when your valuation falls below 0.5× debt, or when a rival's
+  aggression and your weakness line up. The offer arrives as an event with three choices: accept
+  (run ends, scorecard), refuse and fight (morale hit, 6 months of margin pressure), or sell a
+  division (cash now, capability lost).
+- **Hostile** bids only exist after both companies are public, and only land if your ownership is
+  under 40%.
+
+### 11o. Difficulty
+
+**Selectable, and it changes constants rather than cheating the AI.**
+
+| | casual | realistic | brutal |
+|---|---|---|---|
+| starting savings | ×1.4 | ×1.0 | ×0.75 |
+| rival aggression | −20% | — | +25% |
+| demand elasticity | −15% | — | +15% |
+| debt rate | 6% | 9% | 13% |
+| event severity | ×0.8 | ×1.0 | ×1.25 |
+
+Chosen at founding, changeable downward only (you can admit you want it easier, not that you want
+it harder). Recorded on the scorecard.
+
+### 11p. The nine screens
+
+One contract each: what is on it, what changes every tick, what the player does. No screen is
+allowed to be a dashboard of numbers with no verb.
+
+| Screen | Rows | Updates weekly | The verb |
+|---|---|---|---|
+| **market** | your products (price, share, review, trend) · segment totals · nearest rival per segment | share, volume, price position | **re-price**, and see the demand curve move |
+| **lab** | 3 project slots · available nodes · RP and rate | progress, completion dates, RP | **assign** projects and research |
+| **fab** | capacity, utilisation, yield by product, allocation sliders | wafers started, dies out, yield | **allocate** capacity, **buy** capacity |
+| **finance** | cash, weekly P&L, debt, runway, valuation | every figure | **borrow**, **repay**, **take the IPO** |
+| **employee** | headcount by role, morale, attrition, open roles | morale, attrition risk, payroll | **hire**, **lay off**, **pay** |
+| **browser** | the four intel purchases · what you already know | staleness of what you bought | **buy** information |
+| **news** | the full log, filterable by kind | newest first | **read**, and follow a decision from §3d |
+| **company** | name, founding, series, ownership, divisions, policies | policies in force, ownership % | **rename**, **set policies**, **sell a division** |
+| **pip** | transcript, suggested questions, track record | nothing — it is a conversation | **ask** |
+
+**Layout rule.** Every one of these is the same shell: a header with the two committed figures
+(cash, and the screen's own headline), a scrolling body of rows, and a persistent action rail on
+the right. That is intentional — a player who has learned one screen has learned nine, and the
+only new thing per screen is the rows.
+
+**The `news` screen is the log**, and the desk's fixed four-card grid is a *view* of it. One data
+source, two presentations; there is no separate news system.
+
+### 11q. Onboarding
+
+- **Act 0 is the tutorial**, and it is the only one. No popups, no arrows, no modal telling the
+  player to click things.
+- **The first week is scripted** to the extent that demand is guaranteed (2 orders, one of them a
+  returning buyer), so the player cannot fail before they understand why.
+- **A codex exists** in `company`: every mechanic the player has met, one paragraph each, written
+  once and unlocked by doing. It is reference, not a tutorial, and it never interrupts.
+- **PIP is the fallback.** Any player who is lost can ask, which is why PIP's answers are written
+  as teaching rather than as data.
+
+### 11r. Mobile
+
+The brief says browser **and** mobile, and the desk as built is a fixed 100vh three-column layout.
+The decision, since a media query will not fix a layout this dense:
+
+- **Phone portrait is a different shell, not a shrunken one.** The rail becomes a bottom bar of
+  four, the drawer becomes a sheet, the desk body becomes one column: stage on top, profit and chart
+  stacked, news as a single horizontal card row that swipes (the only place scrolling is allowed,
+  because on a phone a four-card grid is unreadable).
+- **Touch targets are 44px minimum** and the PCB puzzle becomes tap-to-place with drag-to-route.
+- **The wizard becomes a vertical stepper** with the four numbers pinned to the top of the sheet
+  rather than a side rail.
+- **Minimum supported width: 360px.** Below that, it stops trying.
+
+This is a v2 target. M1 ships desktop-first, but every screen is specified so that the phone
+version is a **layout swap, not a rewrite** — which is why the shell/rows/action-rail split exists.
+
+### 11s. Audio
+
+**Decided: none in M1.** No music, no effects. The game is a spreadsheet with a diorama and the
+silence suits it. If audio is added later, it is one ambient bed and three event stings, and it is
+off by default — a settings toggle from the first release, not a feature.
+
+### 11t. Save format
+
+**Versioning is dropped as a concern** (user's call: nobody reaches a hundred saves, and the cost
+of migration machinery outweighs the risk). What remains:
+
+- `meta.version` stays in the save, because it costs one field and tells a future build what it is
+  looking at.
+- A save from a newer build is **refused with a message**, not partially loaded.
+- `exportAll` remains the escape hatch: a player who cares can export before an update.
+- No migration table, no compatibility layer, no schema negotiation.
+
+### 11u. What is still open after this
+
+Only three things, and all three are tuning rather than design:
+
+1. the act-0 constants in §11a (proposed, not measured)
+2. whether prototypes ship in M1 (§3e.5)
+3. how many refresh cycles before a demand curve dies (§3e.4)
+
+Everything in §10 is now specified. The next artefact is not more planning — it is the act-0
+economy in `src/sim/`, with the determinism test and a headless week loop, so the numbers above
+can be measured instead of argued about.
